@@ -11,17 +11,32 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     const url = this.configService.get<string>('REDIS_URL');
-    this.client = createClient({ url });
+    this.client = createClient({
+      url,
+      socket: {
+        reconnectStrategy: (retries) => {
+          if (retries > 3) {
+            // Stop retrying to prevent blocking/hanging
+            return false;
+          }
+          return 1000; // Retry after 1 second
+        }
+      }
+    });
 
     this.client.on('error', (err) => {
-      this.logger.error(`Redis client connection error: ${err.message}`, err.stack);
+      this.logger.error(`Redis client connection error: ${err.message}`);
     });
 
     this.client.on('connect', () => {
       this.logger.log('Redis client successfully connected');
     });
 
-    await this.client.connect();
+    try {
+      await this.client.connect();
+    } catch (err: any) {
+      this.logger.warn(`Could not establish initial connection to Redis: ${err.message}. Running in degraded mode without cache.`);
+    }
   }
 
   async onModuleDestroy() {
