@@ -11,16 +11,16 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     const url = this.configService.get<string>('REDIS_URL');
+    const isTls = url?.startsWith('rediss://');
     this.client = createClient({
       url,
       socket: {
         reconnectStrategy: (retries) => {
-          if (retries > 3) {
-            // Stop retrying to prevent blocking/hanging
-            return false;
-          }
-          return 1000; // Retry after 1 second
-        }
+          // Reconnect backoff up to 3 seconds, non-blocking
+          return Math.min(retries * 100, 3000);
+        },
+        tls: isTls ? true : undefined,
+        rejectUnauthorized: isTls ? false : undefined,
       }
     });
 
