@@ -40,6 +40,12 @@ export class ProxyService {
     }
 
     const provider = this.resolveProviderFromModel(model);
+    const isEnabled = await this.providersService.isProviderEnabled(provider);
+    if (!isEnabled) {
+      throw new ServiceUnavailableException(
+        `Provider ${provider} is globally disabled by administration.`,
+      );
+    }
     const maxAttempts = 3;
     let attempts = 0;
     const errors: any[] = [];
@@ -170,6 +176,12 @@ export class ProxyService {
     }
 
     const provider = this.resolveProviderFromModel(model);
+    const isEnabled = await this.providersService.isProviderEnabled(provider);
+    if (!isEnabled) {
+      throw new ServiceUnavailableException(
+        `Provider ${provider} is globally disabled by administration.`,
+      );
+    }
     const maxAttempts = 3;
     let attempts = 0;
     const errors: any[] = [];

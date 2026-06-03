@@ -44,4 +44,19 @@ export class UsersRepository {
       })
       .exec();
   }
+
+  async findPaginated(page: number, limit: number): Promise<UserDocument[]> {
+    const skip = (page - 1) * limit;
+    return await this.userModel
+      .find({})
+      .select('-passwordHash -verificationToken -verificationTokenExpires')
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+      .exec();
+  }
+
+  async countAll(): Promise<number> {
+    return await this.userModel.countDocuments({}).exec();
+  }
 }

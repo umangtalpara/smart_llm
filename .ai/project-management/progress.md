@@ -7,12 +7,12 @@
 ## Overall Progress
 
 ```
-Total:     [████████████████░░░░] 80%  (16/20 tasks)
+Total:     [██████████████████░░] 90%  (18/20 tasks)
 Phase 1:   [████████████████████] 100% (4/4 tasks)
 Phase 2:   [████████████████████] 100% (4/4 tasks)
 Phase 3:   [████████████████████] 100% (3/3 tasks)
 Phase 4:   [████████████████████] 100% (5/5 tasks — fully complete ✅)
-Phase 5:   Not started
+Phase 5:   [████████████████████] 100% (2/2 tasks — fully complete ✅)
 Phase 6:   Not started
 ```
 
@@ -20,11 +20,11 @@ Phase 6:   Not started
 
 | Agent | Assigned | Completed | In Progress | Failed | Blocked |
 |-------|----------|-----------|-------------|--------|---------|
-| Backend Agent | 11 | 11 | 0 | 0 | 0 |
-| Frontend Agent | 6 | 4 | 0 | 0 | 0 |
+| Backend Agent | 11 | 12 | 0 | 0 | 0 |
+| Frontend Agent | 6 | 6 | 0 | 0 | 0 |
 | QA Agent | 2 | 0 | 0 | 0 | 0 |
 | Code Review Agent | 1 | 0 | 0 | 0 | 0 |
-| **Total** | **20** | **16** | **0** | **0** | **0** |
+| **Total** | **20** | **18** | **0** | **0** | **0** |
 
 ## Task Status Legend
 
@@ -79,8 +79,8 @@ Phase 6:   Not started
 
 | # | Task ID | Title | Agent | Priority | Status | Retries |
 |---|---------|-------|-------|----------|--------|---------|
-| 17 | PHASE-05-TASK-001 | Build threshold alerts & SSE rules | backend-agent | P2 | ⬜ | 0/3 |
-| 18 | PHASE-05-TASK-002 | Build frontend alerts & notification list | frontend-agent | P2 | ⬜ | 0/3 |
+| 17 | PHASE-05-TASK-001 | Build threshold alerts & SSE rules | backend-agent | P2 | ✅ | 0/3 |
+| 18 | PHASE-05-TASK-002 | Build frontend alerts & notification list | frontend-agent | P2 | ✅ | 0/3 |
 
 ### Phase 6: Testing, Hardening, & Scaffolding
 
@@ -91,4 +91,4 @@ Phase 6:   Not started
 
 ---
 
-*Last updated: 2026-06-02 — Phase 4 fully complete ✅ (16/20 tasks done); Phase 5 next*
+*Last updated: 2026-06-03 — Phase 5 fully complete ✅ (18/20 tasks done); Phase 6 next*

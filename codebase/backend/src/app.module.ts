@@ -10,6 +10,8 @@ import { ApiKeysModule } from './modules/api-keys/api-keys.module';
 import { ProvidersModule } from './modules/providers/providers.module';
 import { ProxyModule } from './modules/proxy/proxy.module';
 import { MonitorModule } from './modules/monitor/monitor.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -57,6 +59,8 @@ import { AppService } from './app.service';
     ProvidersModule,
     ProxyModule,
     MonitorModule,
+    NotificationsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

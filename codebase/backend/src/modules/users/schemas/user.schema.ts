@@ -36,6 +36,9 @@ export class User {
 
   @Prop({ type: Date, select: false })
   verificationTokenExpires?: Date;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

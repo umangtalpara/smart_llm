@@ -63,7 +63,7 @@ export class LogProcessor extends WorkerHost {
             successCount: isSuccess ? 1 : 0,
             failCount: isSuccess ? 0 : 1,
             totalTokens: totalTokens || 0,
-            latencySumMs: durationMs || 0,
+            latencySumMs: isSuccess ? (durationMs || 0) : 0,
           },
         },
         { upsert: true },

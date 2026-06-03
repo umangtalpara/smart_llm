@@ -9,6 +9,59 @@ import { Connection } from 'mongoose';
 import { RedisService } from './../src/cache/redis.service';
 import { RotationStrategy, ProviderCode } from '../../shared/types';
 
+jest.mock('@nestjs/bullmq', () => {
+  class MockWorkerHost {}
+  return {
+    InjectQueue: (name: string) => {
+      return (target: any, key: string | symbol, index?: number) => {
+        const { Inject } = require('@nestjs/common');
+        return Inject(`BullQueue_${name}`)(target, key, index!);
+      };
+    },
+    Processor: () => (target: any) => {},
+    Process: () => (target: any, key: string | symbol, descriptor: any) => descriptor,
+    WorkerHost: MockWorkerHost,
+    BullModule: {
+      forRoot: () => ({
+        module: class {},
+        providers: [],
+        exports: [],
+      }),
+      forRootAsync: () => ({
+        module: class {},
+        providers: [],
+        exports: [],
+      }),
+      registerQueue: () => ({
+        module: class {},
+        providers: [
+          {
+            provide: 'BullQueue_request-logs',
+            useValue: {
+              add: jest.fn().mockResolvedValue({ id: 'mock-job-id' }),
+              close: jest.fn().mockResolvedValue(null),
+            },
+          },
+        ],
+        exports: ['BullQueue_request-logs'],
+      }),
+      registerQueueAsync: () => ({
+        module: class {},
+        providers: [
+          {
+            provide: 'BullQueue_request-logs',
+            useValue: {
+              add: jest.fn().mockResolvedValue({ id: 'mock-job-id' }),
+              close: jest.fn().mockResolvedValue(null),
+            },
+          },
+        ],
+        exports: ['BullQueue_request-logs'],
+      }),
+    },
+  };
+});
+
 // Mock ioredis completely to prevent BullMQ connection attempts in E2E tests
 jest.mock('ioredis', () => {
   const EventEmitter = require('events');
@@ -26,7 +79,9 @@ jest.mock('ioredis', () => {
         exec: () => Promise.resolve([]),
       };
     }
-    defineCommand() {}
+    defineCommand(name: string, options: any) {
+      (this as any)[name] = jest.fn().mockResolvedValue(null);
+    }
     client() { return Promise.resolve('OK'); }
     quit() {
       process.nextTick(() => {

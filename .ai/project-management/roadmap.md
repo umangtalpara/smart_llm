@@ -6,7 +6,7 @@
 
 ## Status: Generated & Active
 
-We are currently executing **Phase 4: Health Monitoring, Logs, & Analytics** — backend complete, frontend in progress.
+We are currently executing **Phase 6: E2E Testing, Hardening, & Deployment**.
 
 ---
 
@@ -41,10 +41,10 @@ We are currently executing **Phase 4: Health Monitoring, Logs, & Analytics** —
 - [x] Frontend `/logs` page — paginated log table with provider/status filters + failover slide-over drawer
 - [x] Frontend build verified — `next build` ✅ 0 errors, all 11 pages static-generated
 
-### Phase 5: Notifications & Admin Panel ⬜ PENDING (Next)
-- [ ] Threshold alerts system (exhausted keys, provider outages)
-- [ ] In-app notification viewer and socket updates
-- [ ] Admin dashboard system-wide control panel
+### Phase 5: Notifications & Admin Panel ✅ COMPLETE
+- [x] Threshold alerts system (exhausted keys, provider outages)
+- [x] In-app notification viewer and socket updates
+- [x] Admin dashboard system-wide control panel
 
 ### Phase 6: E2E Testing, Hardening, & Deployment ⬜ PENDING
 - [ ] Playwright E2E integration test suites

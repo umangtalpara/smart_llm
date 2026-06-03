@@ -4,11 +4,64 @@ import request from 'supertest';
 import { App } from 'supertest/types';
 import { AppModule } from './../src/app.module';
 import { getConnectionToken } from '@nestjs/mongoose';
-import { Connection } from 'mongoose';
+import { Connection, Types } from 'mongoose';
 import { RedisService } from './../src/cache/redis.service';
 import { LogProcessor } from './../src/modules/monitor/processors/log.processor';
 import { ProviderCode } from '../../shared/types';
 import { Job } from 'bullmq';
+
+jest.mock('@nestjs/bullmq', () => {
+  class MockWorkerHost {}
+  return {
+    InjectQueue: (name: string) => {
+      return (target: any, key: string | symbol, index?: number) => {
+        const { Inject } = require('@nestjs/common');
+        return Inject(`BullQueue_${name}`)(target, key, index!);
+      };
+    },
+    Processor: () => (target: any) => {},
+    Process: () => (target: any, key: string | symbol, descriptor: any) => descriptor,
+    WorkerHost: MockWorkerHost,
+    BullModule: {
+      forRoot: () => ({
+        module: class {},
+        providers: [],
+        exports: [],
+      }),
+      forRootAsync: () => ({
+        module: class {},
+        providers: [],
+        exports: [],
+      }),
+      registerQueue: () => ({
+        module: class {},
+        providers: [
+          {
+            provide: 'BullQueue_request-logs',
+            useValue: {
+              add: jest.fn().mockResolvedValue({ id: 'mock-job-id' }),
+              close: jest.fn().mockResolvedValue(null),
+            },
+          },
+        ],
+        exports: ['BullQueue_request-logs'],
+      }),
+      registerQueueAsync: () => ({
+        module: class {},
+        providers: [
+          {
+            provide: 'BullQueue_request-logs',
+            useValue: {
+              add: jest.fn().mockResolvedValue({ id: 'mock-job-id' }),
+              close: jest.fn().mockResolvedValue(null),
+            },
+          },
+        ],
+        exports: ['BullQueue_request-logs'],
+      }),
+    },
+  };
+});
 
 // Mock ioredis completely to prevent BullMQ connection attempts in E2E tests
 jest.mock('ioredis', () => {
@@ -27,7 +80,9 @@ jest.mock('ioredis', () => {
         exec: () => Promise.resolve([]),
       };
     }
-    defineCommand() {}
+    defineCommand(name: string, options: any) {
+      (this as any)[name] = jest.fn().mockResolvedValue(null);
+    }
     client() { return Promise.resolve('OK'); }
     quit() {
       process.nextTick(() => {
@@ -150,14 +205,14 @@ describe('Monitor & Analytics Module (e2e)', () => {
       await logProcessor.process(mockJob);
 
       // Verify log was saved in RequestLog collection
-      const logs = await mongooseConnection.collection('requestlogs').find({ userId }).toArray();
+      const logs = await mongooseConnection.collection('requestlogs').find({ userId: new Types.ObjectId(userId) }).toArray();
       expect(logs.length).toBe(1);
       expect(logs[0].model).toBe('gpt-4o');
       expect(logs[0].durationMs).toBe(250);
       expect(logs[0].statusCode).toBe(200);
 
       // Verify aggregate stat was updated in UsageStat collection
-      const stats = await mongooseConnection.collection('usagestats').find({ userId }).toArray();
+      const stats = await mongooseConnection.collection('usagestats').find({ userId: new Types.ObjectId(userId) }).toArray();
       expect(stats.length).toBe(1);
       expect(stats[0].requestCount).toBe(1);
       expect(stats[0].successCount).toBe(1);
@@ -188,13 +243,13 @@ describe('Monitor & Analytics Module (e2e)', () => {
       await logProcessor.process(mockJob);
 
       // Verify aggregate stat counts
-      const stats = await mongooseConnection.collection('usagestats').find({ userId }).toArray();
+      const stats = await mongooseConnection.collection('usagestats').find({ userId: new Types.ObjectId(userId) }).toArray();
       expect(stats.length).toBe(1);
       // Daily aggregates should now combine: 1 success (250ms) + 1 fail (500ms) = 2 total requests
       expect(stats[0].requestCount).toBe(2);
       expect(stats[0].successCount).toBe(1);
       expect(stats[0].failCount).toBe(1);
-      expect(stats[0].latencySumMs).toBe(750);
+      expect(stats[0].latencySumMs).toBe(250);
     });
   });
 

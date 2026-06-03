@@ -190,3 +190,110 @@ export const monitorApi = {
     api.get<HealthData>('/monitor/health').then((r) => r.data),
 };
 
+// ─── Notifications API Types ──────────────────────────────────────────────────
+
+export interface NotificationEntry {
+  id: string;
+  type: 'key_exhausted' | 'provider_down' | 'high_error_rate' | 'key_cooldown';
+  title: string;
+  message: string;
+  severity: 'info' | 'warning' | 'critical';
+  read: boolean;
+  metadata: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface NotificationsResponse {
+  data: NotificationEntry[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  unreadCount: number;
+}
+
+// ─── Notifications API Functions ──────────────────────────────────────────────
+
+export const notificationsApi = {
+  getNotifications: (params?: { page?: number; limit?: number; unreadOnly?: boolean }): Promise<NotificationsResponse> => {
+    const query = new URLSearchParams();
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.limit) query.set('limit', String(params.limit));
+    if (params?.unreadOnly !== undefined) query.set('unreadOnly', String(params.unreadOnly));
+    return api.get<NotificationsResponse>(`/notifications?${query.toString()}`).then((r) => r.data);
+  },
+
+  getUnreadCount: (): Promise<{ count: number }> =>
+    api.get<{ count: number }>('/notifications/unread-count').then((r) => r.data),
+
+  markAsRead: (id: string): Promise<{ success: boolean }> =>
+    api.patch<{ success: boolean }>(`/notifications/${id}/read`).then((r) => r.data),
+
+  markAllAsRead: (): Promise<{ success: boolean }> =>
+    api.patch<{ success: boolean }>('/notifications/read-all').then((r) => r.data),
+};
+
+// ─── Admin API Types ──────────────────────────────────────────────────────────
+
+export interface AdminUserEntry {
+  id: string;
+  email: string;
+  name: string;
+  role: 'user' | 'admin';
+  isVerified: boolean;
+  createdAt: string;
+  totalRequests: number;
+}
+
+export interface AdminUsersResponse {
+  data: AdminUserEntry[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface AdminSystemStats {
+  metrics: {
+    totalRequests: number;
+    successRate: number;
+    totalKeys: number;
+    activeKeys: number;
+    totalTokens: number;
+    avgLatencyMs: number;
+  };
+  chartData: ChartDataPoint[];
+}
+
+export interface AdminProviderEntry {
+  id: string;
+  name: string;
+  code: string;
+  status: 'active' | 'inactive';
+  defaultRpmLimit: number;
+  defaultTpmLimit: number;
+}
+
+// ─── Admin API Functions ──────────────────────────────────────────────────────
+
+export const adminApi = {
+  getUsers: (params?: { page?: number; limit?: number }): Promise<AdminUsersResponse> => {
+    const query = new URLSearchParams();
+    if (params?.page) query.set('page', String(params.page));
+    if (params?.limit) query.set('limit', String(params.limit));
+    return api.get<AdminUsersResponse>(`/admin/users?${query.toString()}`).then((r) => r.data);
+  },
+
+  updateUserRole: (id: string, role: 'user' | 'admin'): Promise<unknown> =>
+    api.patch(`/admin/users/${id}/role`, { role }).then((r) => r.data),
+
+  getSystemStats: (days = 30): Promise<AdminSystemStats> =>
+    api.get<AdminSystemStats>(`/admin/stats?days=${days}`).then((r) => r.data),
+
+  getProviders: (): Promise<AdminProviderEntry[]> =>
+    api.get<AdminProviderEntry[]>('/admin/providers').then((r) => r.data),
+
+  updateProviderStatus: (provider: string, status: 'active' | 'inactive'): Promise<unknown> =>
+    api.patch(`/admin/providers/${provider}/status`, { status }).then((r) => r.data),
+};
+
