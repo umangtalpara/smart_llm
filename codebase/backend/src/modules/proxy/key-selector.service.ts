@@ -16,6 +16,7 @@ export class KeySelectorService {
     provider: ProviderCode,
     group: string | undefined,
     strategy: RotationStrategy = RotationStrategy.PRIORITY,
+    excludeIds: string[] = [],
   ): Promise<ApiKeyDocument | null> {
     // 1. Fetch active keys from repository
     const activeKeys = await this.apiKeysRepository.findActiveKeys(userId, provider, group);
@@ -23,11 +24,15 @@ export class KeySelectorService {
       return null;
     }
 
-    // 2. Filter out keys in cooldown (both DB checks and Redis locks)
+    // 2. Filter out keys in cooldown (both DB checks and Redis locks) and excluded keys
     const availableKeys: ApiKeyDocument[] = [];
     const now = new Date();
 
     for (const key of activeKeys) {
+      if (excludeIds.includes(key.id || key._id?.toString())) {
+        continue;
+      }
+
       // DB check
       if (key.cooldownUntil && key.cooldownUntil > now) {
         continue;

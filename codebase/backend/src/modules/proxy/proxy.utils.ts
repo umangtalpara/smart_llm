@@ -1,5 +1,18 @@
 import { ProviderCode } from '../../../../shared/types';
 
+export const PROVIDER_DEFAULT_MODELS: Record<ProviderCode, string> = {
+  [ProviderCode.OPENAI]: 'gpt-4o',
+  [ProviderCode.GEMINI]: 'gemini-1.5-flash',
+  [ProviderCode.CLAUDE]: 'claude-3-haiku',
+  [ProviderCode.GROQ]: 'llama3-8b-8192',
+  [ProviderCode.GROK]: 'grok-beta',
+  [ProviderCode.OPENROUTER]: 'openrouter/auto',
+  [ProviderCode.MISTRAL]: 'mistral-large-latest',
+  [ProviderCode.CEREBRAS]: 'cerebras-llama3.1-8b',
+  [ProviderCode.CAMBERCLOUD]: 'camber-model',
+  [ProviderCode.TOGETHER_AI]: 'llama3-8b-8192',
+};
+
 export function getSupportedModels() {
   return {
     object: 'list',
