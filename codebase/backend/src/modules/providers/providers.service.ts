@@ -6,6 +6,11 @@ import { OpenAIAdapter } from './adapters/openai.adapter';
 import { GeminiAdapter } from './adapters/gemini.adapter';
 import { ClaudeAdapter } from './adapters/claude.adapter';
 import { GroqAdapter } from './adapters/groq.adapter';
+import { GrokAdapter } from './adapters/grok.adapter';
+import { OpenRouterAdapter } from './adapters/openrouter.adapter';
+import { MistralAdapter } from './adapters/mistral.adapter';
+import { CerebrasAdapter } from './adapters/cerebras.adapter';
+import { CambercloudAdapter } from './adapters/cambercloud.adapter';
 import { Provider, ProviderDocument } from './schemas/provider.schema';
 import { RedisService } from '../../cache/redis.service';
 import { ProviderCode } from '../../../../shared/types';
@@ -22,12 +27,22 @@ export class ProvidersService implements OnModuleInit {
     private readonly geminiAdapter: GeminiAdapter,
     private readonly claudeAdapter: ClaudeAdapter,
     private readonly groqAdapter: GroqAdapter,
+    private readonly grokAdapter: GrokAdapter,
+    private readonly openRouterAdapter: OpenRouterAdapter,
+    private readonly mistralAdapter: MistralAdapter,
+    private readonly cerebrasAdapter: CerebrasAdapter,
+    private readonly cambercloudAdapter: CambercloudAdapter,
   ) {
     // Register adapters
     this.adapters.set(ProviderCode.OPENAI, this.openaiAdapter);
     this.adapters.set(ProviderCode.GEMINI, this.geminiAdapter);
     this.adapters.set(ProviderCode.CLAUDE, this.claudeAdapter);
     this.adapters.set(ProviderCode.GROQ, this.groqAdapter);
+    this.adapters.set(ProviderCode.GROK, this.grokAdapter);
+    this.adapters.set(ProviderCode.OPENROUTER, this.openRouterAdapter);
+    this.adapters.set(ProviderCode.MISTRAL, this.mistralAdapter);
+    this.adapters.set(ProviderCode.CEREBRAS, this.cerebrasAdapter);
+    this.adapters.set(ProviderCode.CAMBERCLOUD, this.cambercloudAdapter);
     
     this.logger.log(`Registered ${this.adapters.size} provider adapters successfully.`);
   }
@@ -47,6 +62,11 @@ export class ProvidersService implements OnModuleInit {
       { name: 'Google Gemini', code: ProviderCode.GEMINI, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
       { name: 'Anthropic Claude', code: ProviderCode.CLAUDE, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
       { name: 'Groq', code: ProviderCode.GROQ, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
+      { name: 'xAI Grok', code: ProviderCode.GROK, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
+      { name: 'OpenRouter', code: ProviderCode.OPENROUTER, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
+      { name: 'Mistral AI', code: ProviderCode.MISTRAL, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
+      { name: 'Cerebras', code: ProviderCode.CEREBRAS, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
+      { name: 'Cambercloud', code: ProviderCode.CAMBERCLOUD, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
     ];
 
     for (const p of supported) {

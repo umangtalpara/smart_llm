@@ -27,6 +27,16 @@ export default function ApiKeyCard({
         return 'bg-amber-500/10 text-amber-400 border border-amber-500/25';
       case ProviderCode.GROQ:
         return 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/25';
+      case ProviderCode.GROK:
+        return 'bg-amber-500/10 text-amber-400 border border-amber-500/25';
+      case ProviderCode.OPENROUTER:
+        return 'bg-rose-500/10 text-rose-400 border border-rose-500/25';
+      case ProviderCode.MISTRAL:
+        return 'bg-orange-500/10 text-orange-400 border border-orange-500/25';
+      case ProviderCode.CEREBRAS:
+        return 'bg-violet-500/10 text-violet-400 border border-violet-500/25';
+      case ProviderCode.CAMBERCLOUD:
+        return 'bg-pink-500/10 text-pink-400 border border-pink-500/25';
       default:
         return 'bg-slate-500/10 text-slate-400 border border-slate-500/25';
     }

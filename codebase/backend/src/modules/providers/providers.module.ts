@@ -5,6 +5,11 @@ import { OpenAIAdapter } from './adapters/openai.adapter';
 import { GeminiAdapter } from './adapters/gemini.adapter';
 import { ClaudeAdapter } from './adapters/claude.adapter';
 import { GroqAdapter } from './adapters/groq.adapter';
+import { GrokAdapter } from './adapters/grok.adapter';
+import { OpenRouterAdapter } from './adapters/openrouter.adapter';
+import { MistralAdapter } from './adapters/mistral.adapter';
+import { CerebrasAdapter } from './adapters/cerebras.adapter';
+import { CambercloudAdapter } from './adapters/cambercloud.adapter';
 import { Provider, ProviderSchema } from './schemas/provider.schema';
 
 @Global()
@@ -20,6 +25,11 @@ import { Provider, ProviderSchema } from './schemas/provider.schema';
     GeminiAdapter,
     ClaudeAdapter,
     GroqAdapter,
+    GrokAdapter,
+    OpenRouterAdapter,
+    MistralAdapter,
+    CerebrasAdapter,
+    CambercloudAdapter,
   ],
   exports: [
     ProvidersService,
@@ -27,6 +37,11 @@ import { Provider, ProviderSchema } from './schemas/provider.schema';
     GeminiAdapter,
     ClaudeAdapter,
     GroqAdapter,
+    GrokAdapter,
+    OpenRouterAdapter,
+    MistralAdapter,
+    CerebrasAdapter,
+    CambercloudAdapter,
     MongooseModule,
   ],
 })

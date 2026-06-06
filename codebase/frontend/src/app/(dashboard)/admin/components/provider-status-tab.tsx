@@ -10,6 +10,11 @@ const providerLogos: Record<string, string> = {
   gemini: 'bg-purple-500/10 text-purple-400',
   claude: 'bg-blue-500/10 text-blue-400',
   groq: 'bg-orange-500/10 text-orange-400',
+  grok: 'bg-amber-500/10 text-amber-400',
+  openrouter: 'bg-rose-500/10 text-rose-400',
+  mistral: 'bg-orange-500/10 text-orange-400',
+  cerebras: 'bg-violet-500/10 text-violet-400',
+  cambercloud: 'bg-pink-500/10 text-pink-400',
 };
 
 interface ProviderStatusTabProps {

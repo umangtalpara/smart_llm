@@ -16,6 +16,10 @@ export function getSupportedModels() {
       { id: 'llama3-8b-8192', object: 'model', created: 1713436800, owned_by: 'groq' },
       { id: 'llama3-70b-8192', object: 'model', created: 1713436800, owned_by: 'groq' },
       { id: 'mixtral-8x7b-32768', object: 'model', created: 1702339200, owned_by: 'groq' },
+      { id: 'grok-2', object: 'model', created: 1723000000, owned_by: 'grok' },
+      { id: 'grok-beta', object: 'model', created: 1723000000, owned_by: 'grok' },
+      { id: 'mistral-large-latest', object: 'model', created: 1723000000, owned_by: 'mistral' },
+      { id: 'cerebras-llama3.1-8b', object: 'model', created: 1723000000, owned_by: 'cerebras' },
     ],
   };
 }
@@ -30,6 +34,21 @@ export function resolveProviderFromModel(model: string): ProviderCode {
   }
   if (lowercaseModel.includes('claude')) {
     return ProviderCode.CLAUDE;
+  }
+  if (lowercaseModel.includes('grok')) {
+    return ProviderCode.GROK;
+  }
+  if (lowercaseModel.includes('mistral') && !lowercaseModel.includes('mixtral')) {
+    return ProviderCode.MISTRAL;
+  }
+  if (lowercaseModel.includes('openrouter')) {
+    return ProviderCode.OPENROUTER;
+  }
+  if (lowercaseModel.includes('cerebras')) {
+    return ProviderCode.CEREBRAS;
+  }
+  if (lowercaseModel.includes('camber')) {
+    return ProviderCode.CAMBERCLOUD;
   }
   if (lowercaseModel.includes('llama') || lowercaseModel.includes('mixtral') || lowercaseModel.includes('gemma')) {
     return ProviderCode.GROQ;

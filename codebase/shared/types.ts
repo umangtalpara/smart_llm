@@ -20,6 +20,8 @@ export enum ProviderCode {
   TOGETHER_AI = 'together_ai',
   CEREBRAS = 'cerebras',
   MISTRAL = 'mistral',
+  GROK = 'grok',
+  CAMBERCLOUD = 'cambercloud',
 }
 
 export enum UserRole {

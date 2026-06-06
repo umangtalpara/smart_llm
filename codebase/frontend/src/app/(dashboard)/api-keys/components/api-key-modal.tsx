@@ -154,6 +154,11 @@ export default function ApiKeyModal({
                     <option value={ProviderCode.GEMINI} className="bg-slate-900">Google Gemini</option>
                     <option value={ProviderCode.CLAUDE} className="bg-slate-900">Anthropic Claude</option>
                     <option value={ProviderCode.GROQ} className="bg-slate-900">Groq</option>
+                    <option value={ProviderCode.GROK} className="bg-slate-900">xAI Grok</option>
+                    <option value={ProviderCode.OPENROUTER} className="bg-slate-900">OpenRouter</option>
+                    <option value={ProviderCode.MISTRAL} className="bg-slate-900">Mistral AI</option>
+                    <option value={ProviderCode.CEREBRAS} className="bg-slate-900">Cerebras</option>
+                    <option value={ProviderCode.CAMBERCLOUD} className="bg-slate-900">Cambercloud</option>
                   </select>
                 </div>
               </div>
