@@ -9,6 +9,11 @@ export const api = axios.create({
   },
 });
 
+interface FailedRequest {
+  resolve: (token: string) => void;
+  reject: (error: unknown) => void;
+}
+
 // Attach JWT access token to requests automatically
 api.interceptors.request.use(
   (config) => {
@@ -25,11 +30,9 @@ api.interceptors.request.use(
 
 // Intercept 401 errors to refresh access tokens
 let isRefreshing = false;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let failedRequestsQueue: any[] = [];
+let failedRequestsQueue: FailedRequest[] = [];
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const processQueue = (error: any, token: string | null = null) => {
+const processQueue = (error: unknown, token: string | null = null) => {
   failedRequestsQueue.forEach((prom) => {
     if (token) {
       prom.resolve(token);
@@ -47,7 +50,7 @@ api.interceptors.response.use(
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
-        return new Promise((resolve, reject) => {
+        return new Promise<string>((resolve, reject) => {
           failedRequestsQueue.push({ resolve, reject });
         })
           .then((token) => {
@@ -91,8 +94,7 @@ api.interceptors.response.use(
         isRefreshing = false;
 
         return api(originalRequest);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (refreshError: any) {
+      } catch (refreshError: unknown) {
         processQueue(refreshError, null);
         isRefreshing = false;
 

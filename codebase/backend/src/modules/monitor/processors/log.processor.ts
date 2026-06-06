@@ -17,21 +17,21 @@ export class LogProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<any, any, string>): Promise<any> {
-    const {
-      userId,
-      apiKeyId,
-      provider,
-      model,
-      path,
-      durationMs,
-      statusCode,
-      errorMsg,
-      promptTokens,
-      completionTokens,
-      totalTokens,
-      rotatedFromKeys,
-    } = job.data;
+  async process(job: Job<Record<string, unknown>, unknown, string>): Promise<void> {
+    const userId = job.data.userId as string | undefined;
+    const apiKeyId = job.data.apiKeyId as string | undefined;
+    const provider = job.data.provider as string | undefined;
+    const model = job.data.model as string | undefined;
+    const path = job.data.path as string | undefined;
+    const durationMs = job.data.durationMs as number | undefined;
+    const statusCode = job.data.statusCode as number | undefined;
+    const errorMsg = job.data.errorMsg as string | undefined;
+    const promptTokens = job.data.promptTokens as number | undefined;
+    const completionTokens = job.data.completionTokens as number | undefined;
+    const totalTokens = job.data.totalTokens as number | undefined;
+    const rotatedFromKeys = job.data.rotatedFromKeys as string[] | undefined;
+
+    if (!userId || statusCode === undefined) return;
 
     try {
       // 1. Save RequestLog
@@ -69,8 +69,10 @@ export class LogProcessor extends WorkerHost {
         { upsert: true },
       );
 
-    } catch (err: any) {
-      this.logger.error(`Failed to process request log job ${job.id}: ${err.message}`, err.stack);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const errStack = err instanceof Error ? err.stack : undefined;
+      this.logger.error(`Failed to process request log job ${job.id}: ${errMsg}`, errStack);
       throw err;
     }
   }

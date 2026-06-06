@@ -22,7 +22,7 @@ export class ProxyController {
   @ApiResponse({ status: HttpStatus.SERVICE_UNAVAILABLE, description: 'All active keys are exhausted or cooled down' })
   async executeChatCompletion(
     @GetUser('id') userId: string,
-    @Body() body: any,
+    @Body() body: Record<string, unknown>,
     @Headers('x-rotation-strategy') headerStrategy?: string,
     @Headers('x-fallback-group') headerGroup?: string,
   ) {
@@ -49,7 +49,7 @@ export class ProxyController {
   @ApiResponse({ status: HttpStatus.OK, description: 'Successful embedding payload' })
   async executeEmbeddings(
     @GetUser('id') userId: string,
-    @Body() body: any,
+    @Body() body: Record<string, unknown>,
     @Headers('x-rotation-strategy') headerStrategy?: string,
     @Headers('x-fallback-group') headerGroup?: string,
   ) {

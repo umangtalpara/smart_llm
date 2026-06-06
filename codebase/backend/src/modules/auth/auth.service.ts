@@ -98,7 +98,7 @@ export class AuthService {
       // Rotate tokens
       const tokens = await this.generateTokens(user.id, user.email, user.role);
       return tokens;
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (error instanceof UnauthorizedException) {
         throw error;
       }
@@ -116,11 +116,11 @@ export class AuthService {
     const payload: JwtPayload = { sub: userId, email, role };
 
     const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: (this.configService.get<string>('JWT_ACCESS_EXPIRY') || '15m') as any,
+      expiresIn: (this.configService.get<string>('JWT_ACCESS_EXPIRY') || '15m') as unknown as number,
     });
 
     const refreshToken = await this.jwtService.signAsync(payload, {
-      expiresIn: (this.configService.get<string>('JWT_REFRESH_EXPIRY') || '7d') as any,
+      expiresIn: (this.configService.get<string>('JWT_REFRESH_EXPIRY') || '7d') as unknown as number,
     });
 
     // Store refresh token in Redis with a 7-day expiry (matching refresh token default)

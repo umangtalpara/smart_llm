@@ -28,8 +28,9 @@ export class EncryptionService {
       
       // Combine IV, AuthTag and Encrypted Data
       return `${iv.toString('hex')}:${authTag}:${encrypted}`;
-    } catch (err: any) {
-      this.logger.error(`Encryption failed: ${err.message}`);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Encryption failed: ${errMsg}`);
       throw new Error('Failed to encrypt secret key');
     }
   }
@@ -52,8 +53,9 @@ export class EncryptionService {
       decrypted += decipher.final('utf8');
 
       return decrypted;
-    } catch (err: any) {
-      this.logger.error(`Decryption failed: ${err.message}`);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Decryption failed: ${errMsg}`);
       throw new Error('Failed to decrypt secret key');
     }
   }

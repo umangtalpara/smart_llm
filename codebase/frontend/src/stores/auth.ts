@@ -36,9 +36,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      const errMsg = err.response?.data?.message || 'Login failed. Please verify credentials.';
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      const errMsg = error.response?.data?.message || 'Login failed. Please verify credentials.';
       set({
         error: errMsg,
         isLoading: false,
@@ -61,9 +61,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         isAuthenticated: true,
         isLoading: false,
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      const errMsg = err.response?.data?.message || 'Registration failed. Please try again.';
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } } };
+      const errMsg = error.response?.data?.message || 'Registration failed. Please try again.';
       set({
         error: errMsg,
         isLoading: false,

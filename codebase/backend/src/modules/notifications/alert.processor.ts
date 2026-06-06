@@ -26,9 +26,11 @@ export class AlertProcessor extends WorkerHost {
     super();
   }
 
-  async process(job: Job<any, any, string>): Promise<any> {
-    const { userId, provider, statusCode } = job.data;
-    if (!userId) return;
+  async process(job: Job<Record<string, unknown>, unknown, string>): Promise<void> {
+    const userId = job.data.userId as string | undefined;
+    const provider = job.data.provider as string | undefined;
+    const statusCode = job.data.statusCode as number | undefined;
+    if (!userId || !provider || statusCode === undefined) return;
 
     try {
       await Promise.all([
@@ -36,8 +38,10 @@ export class AlertProcessor extends WorkerHost {
         this.checkHighErrorRate(userId),
         this.checkProviderDown(userId),
       ]);
-    } catch (err: any) {
-      this.logger.error(`AlertProcessor failed for job ${job.id}: ${err.message}`, err.stack);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const errStack = err instanceof Error ? err.stack : undefined;
+      this.logger.error(`AlertProcessor failed for job ${job.id}: ${errMsg}`, errStack);
       // Do NOT rethrow — alert failures must never block log processing
     }
   }

@@ -1,5 +1,5 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { ProviderAdapter } from '../interfaces/provider-adapter.interface';
+import { ProviderAdapter, LlmResponse } from '../interfaces/provider-adapter.interface';
 import { ProviderCode } from '../../../../../shared/types';
 
 @Injectable()
@@ -18,16 +18,17 @@ export class GeminiAdapter implements ProviderAdapter {
         method: 'GET',
       });
       return response.status === 200;
-    } catch (err: any) {
-      this.logger.error(`Gemini key validation failed: ${err.message}`);
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Gemini key validation failed: ${errMsg}`);
       return false;
     }
   }
 
-  async executeChatCompletion(apiKey: string, body: any): Promise<any> {
+  async executeChatCompletion(apiKey: string, body: Record<string, unknown>): Promise<LlmResponse> {
     try {
       // Extract model and map appropriately
-      let model = body.model || 'gemini-1.5-flash';
+      let model = (body.model as string | undefined) || 'gemini-1.5-flash';
       // Strip any prefix client sent if needed, default to gemini models
       if (!model.startsWith('gemini')) {
         model = 'gemini-1.5-flash';
@@ -35,12 +36,12 @@ export class GeminiAdapter implements ProviderAdapter {
 
       const { contents, systemInstruction } = this.translateMessagesToGemini(body.messages);
 
-      const geminiBody: any = {
+      const geminiBody: Record<string, unknown> = {
         contents,
         generationConfig: {
-          temperature: body.temperature ?? 0.7,
-          maxOutputTokens: body.max_tokens ?? 1024,
-          topP: body.top_p ?? 0.95,
+          temperature: (body.temperature as number | undefined) ?? 0.7,
+          maxOutputTokens: (body.max_tokens as number | undefined) ?? 1024,
+          topP: (body.top_p as number | undefined) ?? 0.95,
         },
       };
 
@@ -69,19 +70,20 @@ export class GeminiAdapter implements ProviderAdapter {
         );
       }
 
-      const rawResponse = await response.json();
+      const rawResponse = await response.json() as Record<string, unknown>;
       return this.normalizeGeminiResponse(rawResponse, model);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof HttpException) throw err;
+      const errMsg = err instanceof Error ? err.message : String(err);
       throw new HttpException(
-        `Gemini connection failed: ${err.message}`,
+        `Gemini connection failed: ${errMsg}`,
         HttpStatus.BAD_GATEWAY,
       );
     }
   }
 
-  private translateMessagesToGemini(messages: any[]): { contents: any[]; systemInstruction?: string } {
-    const contents: any[] = [];
+  private translateMessagesToGemini(messages: unknown): { contents: Record<string, unknown>[]; systemInstruction?: string } {
+    const contents: Record<string, unknown>[] = [];
     let systemInstruction: string | undefined;
 
     if (!messages || !Array.isArray(messages)) {
@@ -89,28 +91,36 @@ export class GeminiAdapter implements ProviderAdapter {
     }
 
     for (const msg of messages) {
-      if (msg.role === 'system') {
-        systemInstruction = msg.content;
+      const typedMsg = msg as Record<string, unknown>;
+      if (typedMsg.role === 'system') {
+        systemInstruction = typedMsg.content as string | undefined;
         continue;
       }
 
       // Map roles: 'assistant' -> 'model', others -> 'user'
-      const role = msg.role === 'assistant' ? 'model' : 'user';
+      const role = typedMsg.role === 'assistant' ? 'model' : 'user';
       contents.push({
         role,
-        parts: [{ text: msg.content }],
+        parts: [{ text: typedMsg.content as string | undefined }],
       });
     }
 
     return { contents, systemInstruction };
   }
 
-  private normalizeGeminiResponse(geminiRes: any, model: string): any {
-    const text = geminiRes.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    const finishReason = geminiRes.candidates?.[0]?.finishReason === 'STOP' ? 'stop' : 'length';
-    const promptTokens = geminiRes.usageMetadata?.promptTokenCount || 0;
-    const completionTokens = geminiRes.usageMetadata?.candidatesTokenCount || 0;
-    const totalTokens = geminiRes.usageMetadata?.totalTokenCount || 0;
+  private normalizeGeminiResponse(geminiRes: Record<string, unknown>, model: string): LlmResponse {
+    const candidates = geminiRes.candidates as Record<string, unknown>[] | undefined;
+    const firstCandidate = candidates?.[0];
+    const content = firstCandidate?.content as Record<string, unknown> | undefined;
+    const parts = content?.parts as Record<string, unknown>[] | undefined;
+    const text = (parts?.[0]?.text as string | undefined) || '';
+    
+    const finishReason = firstCandidate?.finishReason === 'STOP' ? 'stop' : 'length';
+    
+    const usageMetadata = geminiRes.usageMetadata as Record<string, unknown> | undefined;
+    const promptTokens = (usageMetadata?.promptTokenCount as number | undefined) || 0;
+    const completionTokens = (usageMetadata?.candidatesTokenCount as number | undefined) || 0;
+    const totalTokens = (usageMetadata?.totalTokenCount as number | undefined) || 0;
 
     return {
       id: `chatcmpl-gemini-${Date.now()}`,

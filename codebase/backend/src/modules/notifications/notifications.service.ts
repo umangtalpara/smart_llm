@@ -5,9 +5,20 @@ import { Notification, NotificationDocument, NotificationType, NotificationSever
 import { Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
+export interface MappedNotification {
+  id: unknown;
+  type: string;
+  title: string;
+  message: string;
+  severity: string;
+  read: boolean;
+  metadata?: Record<string, unknown>;
+  createdAt: Date;
+}
+
 @Injectable()
 export class NotificationsService {
-  private readonly notificationSubject = new Subject<{ userId: string; notification: any }>();
+  private readonly notificationSubject = new Subject<{ userId: string; notification: MappedNotification }>();
 
   constructor(
     @InjectModel(Notification.name)

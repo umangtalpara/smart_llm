@@ -4,6 +4,10 @@ import { ProxyService } from './proxy.service';
 import { ProxyController } from './proxy.controller';
 import { ApiKeysModule } from '../api-keys/api-keys.module';
 import { ProvidersModule } from '../providers/providers.module';
+import { KeySelectorService } from './key-selector.service';
+import { KeyCooldownService } from './key-cooldown.service';
+import { ProxyChatService } from './proxy-chat.service';
+import { ProxyEmbeddingsService } from './proxy-embeddings.service';
 
 @Module({
   imports: [
@@ -14,7 +18,19 @@ import { ProvidersModule } from '../providers/providers.module';
     }),
   ],
   controllers: [ProxyController],
-  providers: [ProxyService],
-  exports: [ProxyService],
+  providers: [
+    ProxyService,
+    KeySelectorService,
+    KeyCooldownService,
+    ProxyChatService,
+    ProxyEmbeddingsService,
+  ],
+  exports: [
+    ProxyService,
+    KeySelectorService,
+    KeyCooldownService,
+    ProxyChatService,
+    ProxyEmbeddingsService,
+  ],
 })
 export class ProxyModule {}

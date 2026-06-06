@@ -25,6 +25,7 @@ import { AppService } from './app.service';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('MONGODB_URI'),
+        autoIndex: configService.get<string>('NODE_ENV') !== 'production',
       }),
       inject: [ConfigService],
     }),
@@ -32,6 +33,7 @@ import { AppService } from './app.service';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
         const redisUrl = configService.get<string>('REDIS_URL', 'redis://localhost:6379');
+        const isTls = redisUrl.startsWith('rediss://');
         try {
           const parsedUrl = new URL(redisUrl);
           return {
@@ -39,6 +41,7 @@ import { AppService } from './app.service';
               host: parsedUrl.hostname || 'localhost',
               port: parseInt(parsedUrl.port, 10) || 6379,
               password: parsedUrl.password || undefined,
+              tls: isTls ? { rejectUnauthorized: false } : undefined,
             },
           };
         } catch {
