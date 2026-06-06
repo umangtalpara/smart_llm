@@ -20,7 +20,7 @@ export default function IntegrationGuide() {
   -d '{
     "model": "gpt-4o",
     "messages": [
-      {"role": "user", "content": "How does automated key rotation work?"}
+      {"role": "user", "content": "2+2=?"}
     ]
   }'`,
 
@@ -35,7 +35,7 @@ headers = {
 data = {
     "model": "gpt-4o",
     "messages": [
-        {"role": "user", "content": "How does automated key rotation work?"}
+        {"role": "user", "content": "2+2=?"}
     ]
 }
 
@@ -52,7 +52,7 @@ print(response.json())`,
   body: JSON.stringify({
     model: "gpt-4o",
     messages: [
-      { role: "user", content: "How does automated key rotation work?" }
+      { role: "user", content: "2+2=?" }
     ]
   })
 });
@@ -91,11 +91,10 @@ console.log(data);`,
                 setActiveTab(lang);
                 setCopied(false);
               }}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all min-h-[32px] uppercase ${
-                activeTab === lang
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all min-h-[32px] uppercase ${activeTab === lang
                   ? 'bg-primary/20 text-primary border border-primary/20'
                   : 'text-slate-400 hover:text-white hover:bg-white/[0.02]'
-              }`}
+                }`}
             >
               {lang === 'curl' ? 'cURL' : lang}
             </button>
