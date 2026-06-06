@@ -5,7 +5,11 @@ import { User } from '../../users/schemas/user.schema';
 
 export type ApiKeyDocument = ApiKey & Document;
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+})
 export class ApiKey {
   @Prop({
     type: MongooseSchema.Types.ObjectId,

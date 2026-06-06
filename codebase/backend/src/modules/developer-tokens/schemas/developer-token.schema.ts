@@ -3,7 +3,11 @@ import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export type DeveloperTokenDocument = DeveloperToken & Document;
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+})
 export class DeveloperToken {
   @Prop({
     type: MongooseSchema.Types.ObjectId,
