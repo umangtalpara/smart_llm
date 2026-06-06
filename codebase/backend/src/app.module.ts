@@ -12,6 +12,7 @@ import { ProxyModule } from './modules/proxy/proxy.module';
 import { MonitorModule } from './modules/monitor/monitor.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { DeveloperTokensModule } from './modules/developer-tokens/developer-tokens.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -64,6 +65,7 @@ import { AppService } from './app.service';
     MonitorModule,
     NotificationsModule,
     AdminModule,
+    DeveloperTokensModule,
   ],
   controllers: [AppController],
   providers: [AppService],

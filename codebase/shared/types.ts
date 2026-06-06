@@ -104,3 +104,15 @@ export interface Notification {
   severity: 'info' | 'warning' | 'critical';
   createdAt: string;
 }
+
+export interface DeveloperToken {
+  id: string;
+  userId: string;
+  name: string;
+  tokenMask: string;
+  isActive: boolean;
+  lastUsedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+

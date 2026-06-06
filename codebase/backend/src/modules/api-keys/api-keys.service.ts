@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Logger } from '@nestjs/common';
 import { ApiKeysRepository } from './api-keys.repository';
 import { EncryptionService } from './encryption.service';
 import { CreateApiKeyDto } from './dto/create-api-key.dto';
 import { UpdateApiKeyDto } from './dto/update-api-key.dto';
 import { ApiKey, ApiKeyDocument } from './schemas/api-key.schema';
 import { KeyStatus } from '../../../../shared/types';
+import { ProvidersService } from '../providers/providers.service';
 
 @Injectable()
 export class ApiKeysService {
@@ -13,9 +14,19 @@ export class ApiKeysService {
   constructor(
     private readonly apiKeysRepository: ApiKeysRepository,
     private readonly encryptionService: EncryptionService,
+    private readonly providersService: ProvidersService,
   ) {}
 
   async create(userId: string, dto: CreateApiKeyDto): Promise<ApiKeyDocument> {
+    // Validate key against the actual provider API first
+    const adapter = this.providersService.getAdapter(dto.provider);
+    const isValid = await adapter.validateKey(dto.apiKey);
+    if (!isValid) {
+      throw new BadRequestException(
+        `The API key provided is invalid, expired, or could not connect to ${dto.provider}.`
+      );
+    }
+
     const encryptedKey = this.encryptionService.encrypt(dto.apiKey);
     const keyMask = this.generateKeyMask(dto.provider, dto.apiKey);
 
@@ -78,6 +89,13 @@ export class ApiKeysService {
     };
 
     if (dto.apiKey) {
+      const adapter = this.providersService.getAdapter(key.provider);
+      const isValid = await adapter.validateKey(dto.apiKey);
+      if (!isValid) {
+        throw new BadRequestException(
+          `The API key provided is invalid, expired, or could not connect to ${key.provider}.`
+        );
+      }
       updates.encryptedKey = this.encryptionService.encrypt(dto.apiKey);
       updates.keyMask = this.generateKeyMask(key.provider, dto.apiKey);
     }

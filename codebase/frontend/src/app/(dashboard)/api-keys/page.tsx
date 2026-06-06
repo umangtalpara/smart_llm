@@ -6,6 +6,8 @@ import { ApiKey, KeyStatus } from '../../../../../shared/types';
 import { Key, Plus, Loader2 } from 'lucide-react';
 import ApiKeyCard from './components/api-key-card';
 import ApiKeyModal, { ApiKeyPayload } from './components/api-key-modal';
+import DeveloperTokensSection from './components/developer-tokens';
+import IntegrationGuide from './components/integration-guide';
 
 export default function ApiKeysPage() {
   const [keys, setKeys] = useState<ApiKey[]>([]);
@@ -158,6 +160,10 @@ export default function ApiKeysPage() {
           ))}
         </div>
       )}
+
+      <DeveloperTokensSection />
+
+      <IntegrationGuide />
 
       <ApiKeyModal
         isOpen={modalOpen}

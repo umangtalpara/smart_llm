@@ -1,13 +1,13 @@
 import { Controller, Post, Get, Body, Headers, UseGuards, HttpStatus, HttpCode } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ProxyService } from './proxy.service';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { DeveloperTokenGuard } from '../../common/guards/developer-token.guard';
 import { GetUser } from '../../common/decorators/get-user.decorator';
 import { RotationStrategy } from '../../../../shared/types';
 
 @ApiTags('Unified Proxy Gateway')
 @Controller('proxy')
-@UseGuards(JwtAuthGuard)
+@UseGuards(DeveloperTokenGuard)
 @ApiBearerAuth()
 export class ProxyController {
   constructor(private readonly proxyService: ProxyService) {}
