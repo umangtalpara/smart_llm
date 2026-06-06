@@ -4,12 +4,15 @@ import { DeveloperTokensRepository } from './developer-tokens.repository';
 import { UsersRepository } from '../users/users.repository';
 import { DeveloperTokenDocument } from './schemas/developer-token.schema';
 import { UserDocument } from '../users/schemas/user.schema';
+import { EncryptionService } from '../api-keys/encryption.service';
+import { DeveloperToken } from '../../../../shared/types';
 
 @Injectable()
 export class DeveloperTokensService {
   constructor(
     private readonly tokenRepository: DeveloperTokensRepository,
     private readonly usersRepository: UsersRepository,
+    private readonly encryptionService: EncryptionService,
   ) {}
 
   async generateToken(
@@ -26,19 +29,35 @@ export class DeveloperTokensService {
     // Create mask (e.g. sk_live_...4a2c)
     const tokenMask = `sk_live_...${rawToken.slice(-6)}`;
 
+    // Encrypt token for showing / copying later
+    const encryptedToken = this.encryptionService.encrypt(rawToken);
+
     const token = await this.tokenRepository.create({
       userId,
       name,
       tokenHash,
       tokenMask,
+      encryptedToken,
       isActive: true,
     });
 
     return { rawToken, token };
   }
 
-  async listTokens(userId: string): Promise<DeveloperTokenDocument[]> {
-    return await this.tokenRepository.findByUser(userId);
+  async listTokens(userId: string): Promise<DeveloperToken[]> {
+    const tokens = await this.tokenRepository.findByUser(userId);
+    return tokens.map((t) => {
+      const obj = t.toObject({ virtuals: true }) as any;
+      if (obj._id && !obj.id) {
+        obj.id = obj._id.toString();
+      }
+      obj.rawToken = obj.encryptedToken
+        ? this.encryptionService.decrypt(obj.encryptedToken)
+        : null;
+      delete obj.encryptedToken;
+      delete obj.tokenHash; // Delete hash from returned payload for security
+      return obj as DeveloperToken;
+    });
   }
 
   async revokeToken(userId: string, tokenId: string): Promise<void> {

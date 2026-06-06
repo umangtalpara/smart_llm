@@ -5,11 +5,13 @@ import { DeveloperTokensRepository } from './developer-tokens.repository';
 import { DeveloperTokensService } from './developer-tokens.service';
 import { DeveloperTokensController } from './developer-tokens.controller';
 import { UsersModule } from '../users/users.module';
+import { ApiKeysModule } from '../api-keys/api-keys.module';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: DeveloperToken.name, schema: DeveloperTokenSchema }]),
     UsersModule,
+    ApiKeysModule,
   ],
   providers: [DeveloperTokensRepository, DeveloperTokensService],
   controllers: [DeveloperTokensController],

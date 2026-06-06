@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../../../../services/api';
 import { DeveloperToken } from '../../../../../../shared/types';
-import { ShieldAlert, Plus, Trash2, Key, Loader2, Copy, Check } from 'lucide-react';
+import { ShieldAlert, Plus, Key, Loader2, Copy, Check } from 'lucide-react';
+import DeveloperTokensTable from './developer-tokens-table';
 
 export default function DeveloperTokensSection() {
   const [tokens, setTokens] = useState<DeveloperToken[]>([]);
@@ -14,6 +15,7 @@ export default function DeveloperTokensSection() {
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showInput, setShowInput] = useState(false);
+  const [copiedTokenId, setCopiedTokenId] = useState<string | null>(null);
 
   const fetchTokens = async () => {
     setIsLoading(true);
@@ -74,12 +76,20 @@ export default function DeveloperTokensSection() {
     }
   };
 
+  const copyTokenMask = (mask: string, id: string) => {
+    navigator.clipboard.writeText(mask);
+    setCopiedTokenId(id);
+    setTimeout(() => setCopiedTokenId(null), 2000);
+  };
+
   return (
     <div className="glass-card rounded-2xl p-6 border border-white/[0.08] space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
         <div>
           <h2 className="text-base font-bold text-white font-outfit">Gateway Access Tokens</h2>
-          <p className="text-[11px] text-slate-400 mt-0.5">Custom developer keys used to authenticate your third-party applications with this LLM proxy.</p>
+          <p className="text-[11px] text-slate-400 mt-0.5">
+            Custom developer keys used to authenticate your third-party applications with this LLM proxy.
+          </p>
         </div>
         {!showInput && !generatedRawToken && (
           <button
@@ -163,47 +173,13 @@ export default function DeveloperTokensSection() {
       )}
 
       {/* Tokens List */}
-      {isLoading ? (
-        <div className="flex items-center justify-center py-6">
-          <Loader2 className="w-5 h-5 animate-spin text-cyan-400" />
-        </div>
-      ) : tokens.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center bg-white/[0.01] rounded-xl border border-dashed border-white/5 p-4">
-          <Key className="w-5 h-5 text-slate-600 mb-2" />
-          <p className="text-[11px] text-slate-500">No access tokens generated yet. Generate one above to access LLM APIs.</p>
-        </div>
-      ) : (
-        <div className="overflow-hidden border border-white/5 rounded-xl bg-white/[0.01]">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-white/5 bg-white/[0.02] text-[10px] uppercase font-bold text-slate-400">
-                <th className="p-3">Name</th>
-                <th className="p-3">Token Mask</th>
-                <th className="p-3">Created</th>
-                <th className="p-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5 text-[11px] text-slate-300">
-              {tokens.map((token) => (
-                <tr key={token.id} className="hover:bg-white/[0.02] transition-colors">
-                  <td className="p-3 font-bold text-white max-w-[150px] truncate">{token.name}</td>
-                  <td className="p-3 font-mono text-cyan-400 select-all">{token.tokenMask}</td>
-                  <td className="p-3 text-slate-400">{new Date(token.createdAt).toLocaleDateString()}</td>
-                  <td className="p-3 text-right">
-                    <button
-                      onClick={() => handleRevoke(token.id)}
-                      className="p-2 hover:bg-rose-500/10 rounded-lg text-slate-400 hover:text-rose-400 transition-all"
-                      title="Revoke Token"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      <DeveloperTokensTable
+        tokens={tokens}
+        isLoading={isLoading}
+        copiedTokenId={copiedTokenId}
+        onCopyTokenMask={copyTokenMask}
+        onRevoke={handleRevoke}
+      />
     </div>
   );
 }

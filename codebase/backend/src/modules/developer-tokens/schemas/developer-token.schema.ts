@@ -26,6 +26,9 @@ export class DeveloperToken {
   @Prop({ required: true })
   tokenMask: string; // e.g., sk_live_...xxxx
 
+  @Prop({ required: true })
+  encryptedToken: string;
+
   @Prop({ type: Boolean, default: true, index: true })
   isActive: boolean;
 

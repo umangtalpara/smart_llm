@@ -1,7 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { api } from '../../../../services/api';
+import React, { useState } from 'react';
 import { Terminal, Copy, Check, Code, Shield } from 'lucide-react';
 
 type Language = 'curl' | 'python' | 'javascript';
@@ -9,24 +8,9 @@ type Language = 'curl' | 'python' | 'javascript';
 export default function IntegrationGuide() {
   const [activeTab, setActiveTab] = useState<Language>('curl');
   const [copied, setCopied] = useState(false);
-  const [tokenMask, setTokenMask] = useState<string>('');
-
-  useEffect(() => {
-    const fetchFirstToken = async () => {
-      try {
-        const response = await api.get('/developer-tokens');
-        if (response.data && response.data.length > 0) {
-          setTokenMask(response.data[0].tokenMask);
-        }
-      } catch (err: unknown) {
-        console.error('Failed to fetch developer tokens for integration guide', err);
-      }
-    };
-    fetchFirstToken();
-  }, []);
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
-  const displayToken = tokenMask || '<YOUR_DEVELOPER_TOKEN>';
+  const displayToken = '<YOUR_DEVELOPER_TOKEN>';
 
   const codeSnippets: Record<Language, string> = {
     curl: `curl -X POST ${API_BASE_URL}/proxy/chat/completions \\

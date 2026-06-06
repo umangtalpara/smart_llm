@@ -113,6 +113,7 @@ export interface DeveloperToken {
   name: string;
   tokenMask: string;
   isActive: boolean;
+  rawToken?: string;
   lastUsedAt?: string;
   createdAt: string;
   updatedAt: string;
