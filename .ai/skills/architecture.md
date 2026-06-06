@@ -67,9 +67,9 @@ Format:
 - Use interfaces for loose coupling between modules.
 
 ### Asynchronous (Decoupled Communication)
-- RabbitMQ for reliable event-driven communication.
+- BullMQ (Redis-backed) for reliable background job processing and event queues.
 - Event patterns: `module.entity.action` (e.g., `auth.user.registered`).
-- Dead-letter queues for failed message handling.
+- Failed job queues and retries for error handling.
 - Idempotent message processing.
 
 ## Scalability Checklist

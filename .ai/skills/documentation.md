@@ -60,7 +60,7 @@ Brief description of the project.
 - **Backend**: Node.js, NestJS, TypeScript
 - **Frontend**: Next.js, React, TypeScript, Tailwind CSS
 - **Databases**: MongoDB, Redis
-- **Queue**: RabbitMQ
+- **Queue**: BullMQ (Redis-backed)
 - **Containerization**: Docker
 
 ## Getting Started

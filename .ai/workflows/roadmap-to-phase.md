@@ -76,7 +76,7 @@
 ┌─────────────────────────┐
 │  7. TRIGGER EXECUTION    │
 │  Hand off to             │
-│  phase-execution.workflow│
+│  phase-execution.md      │
 └─────────────────────────┘
 ```
 

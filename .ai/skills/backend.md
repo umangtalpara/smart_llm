@@ -35,10 +35,10 @@
 - Use transactions and sessions for multi-document operations.
 
 ### Background Processing
-- Configure RabbitMQ producers and consumers.
+- Configure BullMQ queues, workers, and processors.
 - Implement job scheduling with `@nestjs/schedule`.
 - Build event-driven communication between modules.
-- Handle dead-letter queues and retry strategies.
+- Handle job retries, backoff, and failed job queueing.
 
 ### Caching & Session Storage (Redis)
 - Configure Redis for session management and data caching.

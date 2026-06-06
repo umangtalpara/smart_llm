@@ -1,6 +1,6 @@
 # Completed Tasks
 
-> This file is automatically maintained by the Super Agent. Every successfully validated task is recorded here. Tasks listed here are NEVER re-executed.
+> This file is updated by the AI when instructed. Every successfully validated task is recorded here. Tasks listed here are NEVER re-executed.
 
 ---
 

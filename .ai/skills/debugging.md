@@ -31,7 +31,7 @@
 | Error | Common Cause | Fix |
 |-------|-------------|-----|
 | `MODULE_NOT_FOUND` | Missing import or dependency | Check import path, run `npm install` |
-| `ECONNREFUSED` | Database/Redis/RabbitMQ not running | Start Docker services |
+| `ECONNREFUSED` | Database/Redis not running | Start Docker services |
 | `QueryFailedError` | Invalid SQL, missing column, type mismatch | Check migration, entity definition |
 | `UnauthorizedException` | Expired/invalid JWT | Check token expiry, secret key |
 | `ValidationError` | Invalid DTO input | Check class-validator decorators |

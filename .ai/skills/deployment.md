@@ -46,14 +46,11 @@ services:
       - NODE_ENV=development
       - MONGODB_URI=mongodb://mongo:27017/app
       - REDIS_URL=redis://redis:6379
-      - RABBITMQ_URL=amqp://rabbitmq:5672
     depends_on:
       mongo:
         condition: service_healthy
       redis:
         condition: service_started
-      rabbitmq:
-        condition: service_healthy
     volumes:
       - ./codebase/backend:/app
       - /app/node_modules
@@ -91,16 +88,7 @@ services:
     volumes:
       - redis_data:/data
 
-  rabbitmq:
-    image: rabbitmq:3-management-alpine
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+
 
 volumes:
   mongo_data:
