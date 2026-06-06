@@ -70,6 +70,6 @@ Once triggered, the Cooperating Agents will execute the following workflows:
 ## 📊 Monitoring Progress
 
 You can watch the build progress and review logs at any time by inspecting the status files in the **`.ai/project-management/`** directory:
-* **[roadmap.md](file:///d:/Umang/provenpeak/saasAi/.ai/project-management/roadmap.md)**: View the generated technical plan and structured phase checklist.
-* **[project-status.md](file:///d:/Umang/provenpeak/saasAi/.ai/project-management/project-status.md)**: Check the high-level project status (Awaiting PRD, Planning, In Progress, Blocked, Completed).
-* **[progress.md](file:///d:/Umang/provenpeak/saasAi/.ai/project-management/progress.md)**: Track the active task list showing which agent is working on what task, along with success/failure logs.
+* **[roadmap.md](../.ai/project-management/roadmap.md)**: View the generated technical plan and structured phase checklist.
+* **[project-status.md](../.ai/project-management/project-status.md)**: Check the high-level project status (Awaiting PRD, Planning, In Progress, Blocked, Completed).
+* **[progress.md](../.ai/project-management/progress.md)**: Track the active task list showing which agent is working on what task, along with success/failure logs.
