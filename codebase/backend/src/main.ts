@@ -28,7 +28,7 @@ async function bootstrap() {
   });
 
   // Global prefixes and filters
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api/v1', { exclude: ['/', 'health'] });
   app.useGlobalFilters(new HttpExceptionFilter());
   
   // Global DTO pipes validation
