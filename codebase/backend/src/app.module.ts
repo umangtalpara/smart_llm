@@ -13,6 +13,7 @@ import { MonitorModule } from './modules/monitor/monitor.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { DeveloperTokensModule } from './modules/developer-tokens/developer-tokens.module';
+import { MailModule } from './modules/mail/mail.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -57,6 +58,7 @@ import { AppService } from './app.service';
       inject: [ConfigService],
     }),
     RedisModule,
+    MailModule,
     UsersModule,
     AuthModule,
     ApiKeysModule,

@@ -14,4 +14,10 @@ export const envValidationSchema = Joi.object({
     .length(32)
     .required()
     .description('32-character encryption key for AES-256-GCM'),
+  SMTP_HOST: Joi.string().optional(),
+  SMTP_PORT: Joi.number().optional(),
+  SMTP_USER: Joi.string().optional(),
+  SMTP_PASS: Joi.string().optional(),
+  SMTP_FROM: Joi.string().optional(),
+  FRONTEND_URL: Joi.string().default('http://localhost:3000'),
 });

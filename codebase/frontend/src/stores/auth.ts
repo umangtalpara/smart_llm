@@ -50,15 +50,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   register: async (email, name, password) => {
     set({ isLoading: true, error: null });
     try {
-      const response = await api.post('/auth/register', { email, name, password });
-      const { user, accessToken, refreshToken } = response.data;
-
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-
+      await api.post('/auth/register', { email, name, password });
       set({
-        user,
-        isAuthenticated: true,
         isLoading: false,
       });
     } catch (err: unknown) {

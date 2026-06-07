@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { api } from '../../../services/api';
 import { KeyRound, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
@@ -21,11 +22,12 @@ export default function ForgotPasswordPage() {
 
     setIsLoading(true);
     try {
-      // Simulate API call for password reset
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      await api.post('/auth/forgot-password', { email });
       setIsSubmitted(true);
-    } catch {
-      setError('Failed to send reset link. Please try again.');
+    } catch (err: unknown) {
+      const errorResponse = err as { response?: { data?: { message?: string } } };
+      const errMsg = errorResponse.response?.data?.message || 'Failed to send reset link. Please try again.';
+      setError(errMsg);
     } finally {
       setIsLoading(false);
     }

@@ -59,4 +59,38 @@ export class UsersRepository {
   async countAll(): Promise<number> {
     return await this.userModel.countDocuments({}).exec();
   }
+
+  async findByResetToken(token: string): Promise<UserDocument | null> {
+    return await this.userModel
+      .findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: { $gt: new Date() },
+      })
+      .select('+passwordHash +resetPasswordToken +resetPasswordExpires')
+      .exec();
+  }
+
+  async updateResetToken(userId: string, token: string | null, expires: Date | null): Promise<UserDocument | null> {
+    return await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        { resetPasswordToken: token, resetPasswordExpires: expires },
+        { new: true }
+      )
+      .exec();
+  }
+
+  async updatePassword(userId: string, passwordHash: string): Promise<UserDocument | null> {
+    return await this.userModel
+      .findByIdAndUpdate(
+        userId,
+        {
+          passwordHash,
+          resetPasswordToken: null,
+          resetPasswordExpires: null,
+        },
+        { new: true }
+      )
+      .exec();
+  }
 }

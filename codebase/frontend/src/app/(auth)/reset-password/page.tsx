@@ -1,35 +1,27 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '../../../stores/auth';
-import { UserPlus, Eye, EyeOff, Loader2, CheckCircle2 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { api } from '../../../services/api';
+import { Lock, Eye, EyeOff, Loader2, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function RegisterPage() {
+function ResetPasswordForm() {
   const router = useRouter();
-  const { register, isAuthenticated, error, clearError, isLoading } = useAuthStore();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
 
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [countdown, setCountdown] = useState(3);
 
-  useEffect(() => {
-    clearError();
-    if (isAuthenticated) {
-      router.push('/dashboard');
-    }
-  }, [isAuthenticated, router, clearError]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     if (!isSuccess) return;
-
     const interval = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
@@ -40,37 +32,61 @@ export default function RegisterPage() {
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(interval);
   }, [isSuccess, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading || isSuccess) return;
-    setValidationError(null);
+    setError(null);
 
-    if (!name || !email || !password || !confirmPassword) {
-      setValidationError('Please fill in all fields.');
+    if (!token) {
+      setError('Reset token is missing or invalid.');
+      return;
+    }
+
+    if (!password || !confirmPassword) {
+      setError('Please fill in all fields.');
       return;
     }
 
     if (password.length < 8) {
-      setValidationError('Password must be at least 8 characters.');
+      setError('Password must be at least 8 characters.');
       return;
     }
 
     if (password !== confirmPassword) {
-      setValidationError('Passwords do not match.');
+      setError('Passwords do not match.');
       return;
     }
 
+    setIsLoading(true);
     try {
-      await register(email, name, password);
+      await api.post('/auth/reset-password', { token, password });
       setIsSuccess(true);
-    } catch {
-      // Handled by store state
+    } catch (err: unknown) {
+      const errorResponse = err as { response?: { data?: { message?: string } } };
+      const errMsg = errorResponse.response?.data?.message || 'Failed to reset password. Please try again.';
+      setError(errMsg);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (!token) {
+    return (
+      <div className="flex flex-col items-center space-y-4 text-center py-4">
+        <div className="p-3 text-xs text-red-200 bg-red-950/40 border border-red-500/30 rounded-lg text-center backdrop-blur-sm">
+          Invalid reset request: Missing token query parameter.
+        </div>
+        <Link
+          href="/login"
+          className="btn-neon-outline font-semibold text-xs py-2.5 px-6 mt-4 w-full flex items-center justify-center space-x-2"
+        >
+          <span>Go to Log In</span>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <AnimatePresence mode="wait">
@@ -96,10 +112,10 @@ export default function RegisterPage() {
           {/* Header */}
           <div className="space-y-2">
             <h1 className="text-3xl font-extrabold tracking-tight font-outfit text-white">
-              Account Created!
+              Password Reset!
             </h1>
             <p className="text-sm text-slate-400 max-w-xs">
-              Registration successful. You will be redirected to the login page to sign in.
+              Your password has been successfully updated. Redirecting to the login page shortly.
             </p>
           </div>
 
@@ -143,58 +159,27 @@ export default function RegisterPage() {
           {/* Header */}
           <div className="flex flex-col items-center space-y-2 text-center">
             <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-primary animate-float mb-2 shadow-[0_0_15px_rgba(0,255,255,0.2)]">
-              <UserPlus className="w-6 h-6" />
+              <Lock className="w-6 h-6" />
             </div>
             <h1 className="text-3xl font-extrabold tracking-tight font-outfit">
-              Join <span className="text-primary glow-text">ProxyLLM</span>
+              New <span className="text-primary glow-text">Password</span>
             </h1>
             <p className="text-sm text-slate-400">
-              Create an account to start rotating your API keys
+              Choose a secure password for your ProxyLLM account
             </p>
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Errors display */}
-            {(validationError || error) && (
-              <div className="p-3 text-xs text-red-200 bg-red-950/40 border border-red-500/30 rounded-lg text-center backdrop-blur-sm animate-pulse">
-                {validationError || error}
+            {error && (
+              <div className="p-3 text-xs text-red-200 bg-red-950/40 border border-red-500/30 rounded-lg text-center backdrop-blur-sm">
+                {error}
               </div>
             )}
 
             <div className="space-y-1">
-              <label htmlFor="name" className="text-xs font-semibold text-slate-300">
-                Full Name
-              </label>
-              <input
-                id="name"
-                type="text"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={isLoading}
-                className="w-full h-12 px-4 rounded-lg bg-white/[0.03] border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm"
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label htmlFor="email" className="text-xs font-semibold text-slate-300">
-                Email Address
-              </label>
-              <input
-                id="email"
-                type="email"
-                placeholder="user@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-                className="w-full h-12 px-4 rounded-lg bg-white/[0.03] border border-white/10 text-white placeholder-slate-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm"
-              />
-            </div>
-
-            <div className="space-y-1">
               <label htmlFor="password" className="text-xs font-semibold text-slate-300">
-                Password (min 8 characters)
+                New Password (min 8 characters)
               </label>
               <div className="relative">
                 <input
@@ -240,23 +225,30 @@ export default function RegisterPage() {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Creating Account...</span>
+                  <span>Resetting Password...</span>
                 </>
               ) : (
-                <span>Create Account</span>
+                <span>Update Password</span>
               )}
             </button>
           </form>
-
-          {/* Footer */}
-          <div className="text-center text-xs text-slate-400">
-            Already have an account?{' '}
-            <Link href="/login" className="text-primary hover:underline hover:text-cyan-400 font-semibold">
-              Log In
-            </Link>
-          </div>
         </motion.div>
       )}
     </AnimatePresence>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center space-y-4 py-8">
+          <Loader2 className="w-8 h-8 animate-spin text-cyan-400" />
+          <span className="text-xs text-slate-400 font-semibold">Loading reset wizard...</span>
+        </div>
+      }
+    >
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

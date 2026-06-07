@@ -37,6 +37,12 @@ export class User {
   @Prop({ type: Date, select: false })
   verificationTokenExpires?: Date;
 
+  @Prop({ type: String, select: false })
+  resetPasswordToken?: string;
+
+  @Prop({ type: Date, select: false })
+  resetPasswordExpires?: Date;
+
   createdAt?: Date;
   updatedAt?: Date;
 }
