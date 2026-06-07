@@ -51,8 +51,24 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('docs', app, document);
 
-  await app.listen(port);
-  logger.log(`ProxyLLM Backend is running on: http://localhost:${port}/api/v1`);
-  logger.log(`API Documentation is available at: http://localhost:${port}/docs`);
+  await app.init();
+
+  if (process.env.VERCEL !== '1') {
+    await app.listen(port);
+    logger.log(`ProxyLLM Backend is running on: http://localhost:${port}/api/v1`);
+    logger.log(`API Documentation is available at: http://localhost:${port}/docs`);
+  }
+
+  return app;
 }
-bootstrap();
+
+// Support Vercel serverless deployment
+let server: any;
+export default async (req: any, res: any) => {
+  if (!server) {
+    const app = await bootstrap();
+    server = app.getHttpAdapter().getInstance();
+  }
+  return server(req, res);
+};
+
