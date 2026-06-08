@@ -20,9 +20,11 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     this.client = createClient({
       url,
       socket: {
+        connectTimeout: 10000, // Increase connection timeout to 10s for slow cold-starts
+        keepAlive: true,       // Enable TCP keep-alive
         reconnectStrategy: (retries) => {
-          // Reconnect backoff up to 3 seconds, non-blocking
-          return Math.min(retries * 100, 3000);
+          // Less aggressive reconnect strategy (1s, 2s, 3s...) to avoid spamming the Redis server and hitting connection limits
+          return Math.min(retries * 1000, 10000);
         },
         tls: isTls ? true : undefined,
         rejectUnauthorized: isTls ? false : undefined,
@@ -30,7 +32,15 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     });
 
     this.client.on('error', (err) => {
-      this.logger.error(`Redis client connection error: ${err.message}`);
+      const isTransient = 
+        err.message.includes('disconnected') || 
+        err.message.includes('Socket closed') || 
+        err.message.includes('ECONNRESET');
+      if (isTransient) {
+        this.logger.warn(`Redis client transient connection drop: ${err.message}`);
+      } else {
+        this.logger.error(`Redis client connection error: ${err.message}`);
+      }
     });
 
     this.client.on('connect', () => {
