@@ -8,7 +8,12 @@ import {
   HttpStatus,
   Req,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -25,8 +30,14 @@ export class AuthController {
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user account' })
-  @ApiResponse({ status: HttpStatus.CREATED, description: 'User successfully registered' })
-  @ApiResponse({ status: HttpStatus.CONFLICT, description: 'Email already registered' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'User successfully registered',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Email already registered',
+  })
   async register(@Body() registerDto: RegisterDto) {
     return await this.authService.register(registerDto);
   }
@@ -34,8 +45,14 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Authenticate user and return JWT tokens' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Login successful, returns tokens' })
-  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid credentials' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Login successful, returns tokens',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid credentials',
+  })
   async login(@Body() loginDto: LoginDto) {
     return await this.authService.login(loginDto);
   }
@@ -43,8 +60,14 @@ export class AuthController {
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Rotate JWT access token using refresh token' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Tokens rotated successfully' })
-  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Invalid or expired refresh token' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Tokens rotated successfully',
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Invalid or expired refresh token',
+  })
   async refresh(@Body('refreshToken') refreshToken: string) {
     return await this.authService.refresh(refreshToken);
   }
@@ -54,7 +77,10 @@ export class AuthController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Log out user and invalidate refresh token' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Logged out successfully' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Logged out successfully',
+  })
   async logout(@GetUser('id') userId: string) {
     return await this.authService.logout(userId);
   }
@@ -86,8 +112,14 @@ export class AuthController {
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Reset password using token' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Password reset successful' })
-  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Invalid or expired token' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Password reset successful',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid or expired token',
+  })
   async resetPassword(@Body() dto: ResetPasswordDto) {
     return await this.authService.resetPassword(dto);
   }

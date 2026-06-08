@@ -4,8 +4,14 @@ import { BullModule } from '@nestjs/bullmq';
 import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 import { AlertProcessor } from './alert.processor';
-import { Notification, NotificationSchema } from './schemas/notification.schema';
-import { UsageStat, UsageStatSchema } from '../monitor/schemas/usage-stat.schema';
+import {
+  Notification,
+  NotificationSchema,
+} from './schemas/notification.schema';
+import {
+  UsageStat,
+  UsageStatSchema,
+} from '../monitor/schemas/usage-stat.schema';
 import { ApiKey, ApiKeySchema } from '../api-keys/schemas/api-key.schema';
 import { RedisModule } from '../../cache/redis.module';
 

@@ -4,18 +4,19 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
-  Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { DatadogLoggerService } from '../logging/datadog-logger.service';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-  private readonly logger = new Logger(HttpExceptionFilter.name);
+  constructor(private readonly logger: DatadogLoggerService) {}
 
   catch(exception: any, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+    const requestId = (request as any).requestId;
 
     const status =
       exception instanceof HttpException
@@ -34,11 +35,39 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message = resContent || exception.message;
       }
     } else {
-      // Log unhandled non-HttpExceptions (actual bugs/crashes)
       message = exception.message || 'An unexpected error occurred';
+    }
+
+    const logData = {
+      http: {
+        statusCode: status,
+        url: request.url,
+        method: request.method,
+        request_id: requestId,
+      },
+      error: {
+        message,
+        kind:
+          exception.name ||
+          (exception instanceof Error
+            ? exception.constructor.name
+            : 'UnhandledException'),
+        stack: exception.stack,
+      },
+    };
+
+    if (status >= 500) {
       this.logger.error(
-        `Unhandled Exception: ${message} at path: ${request.url}`,
+        `Unhandled Exception: ${message} at path: ${request.method} ${request.url}`,
         exception.stack,
+        'HttpExceptionFilter',
+        logData,
+      );
+    } else {
+      this.logger.warn(
+        `HTTP Exception ${status}: ${message} at path: ${request.method} ${request.url}`,
+        'HttpExceptionFilter',
+        logData,
       );
     }
 

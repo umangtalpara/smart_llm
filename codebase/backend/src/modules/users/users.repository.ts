@@ -30,7 +30,10 @@ export class UsersRepository {
     return await this.userModel.findById(id).exec();
   }
 
-  async update(id: string, updates: Partial<User>): Promise<UserDocument | null> {
+  async update(
+    id: string,
+    updates: Partial<User>,
+  ): Promise<UserDocument | null> {
     return await this.userModel
       .findByIdAndUpdate(id, updates, { new: true })
       .exec();
@@ -70,17 +73,24 @@ export class UsersRepository {
       .exec();
   }
 
-  async updateResetToken(userId: string, token: string | null, expires: Date | null): Promise<UserDocument | null> {
+  async updateResetToken(
+    userId: string,
+    token: string | null,
+    expires: Date | null,
+  ): Promise<UserDocument | null> {
     return await this.userModel
       .findByIdAndUpdate(
         userId,
         { resetPasswordToken: token, resetPasswordExpires: expires },
-        { new: true }
+        { new: true },
       )
       .exec();
   }
 
-  async updatePassword(userId: string, passwordHash: string): Promise<UserDocument | null> {
+  async updatePassword(
+    userId: string,
+    passwordHash: string,
+  ): Promise<UserDocument | null> {
     return await this.userModel
       .findByIdAndUpdate(
         userId,
@@ -89,7 +99,7 @@ export class UsersRepository {
           resetPasswordToken: null,
           resetPasswordExpires: null,
         },
-        { new: true }
+        { new: true },
       )
       .exec();
   }

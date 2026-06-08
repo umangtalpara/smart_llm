@@ -14,7 +14,11 @@ export class KeyCooldownService {
     private readonly redisService: RedisService,
   ) {}
 
-  async handleKeyFailure(key: ApiKeyDocument, status: number, message: string): Promise<void> {
+  async handleKeyFailure(
+    key: ApiKeyDocument,
+    status: number,
+    message: string,
+  ): Promise<void> {
     // Increment overall key error count
     await this.apiKeysRepository.update(key.id, {
       errorCount: key.errorCount + 1,
@@ -32,8 +36,14 @@ export class KeyCooldownService {
     }
 
     // 2. Put key in temporary cooldown on 429 Too Many Requests (Rate limit) or 5xx/timeout errors
-    if (status === HttpStatus.TOO_MANY_REQUESTS || status >= 500 || status === 0) {
-      const cooldownUntil = new Date(Date.now() + this.defaultCooldownSeconds * 1000);
+    if (
+      status === HttpStatus.TOO_MANY_REQUESTS ||
+      status >= 500 ||
+      status === 0
+    ) {
+      const cooldownUntil = new Date(
+        Date.now() + this.defaultCooldownSeconds * 1000,
+      );
 
       // Update DB cooldown state
       await this.apiKeysRepository.update(key.id, {

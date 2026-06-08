@@ -1,5 +1,8 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { ProviderAdapter, LlmResponse } from '../interfaces/provider-adapter.interface';
+import {
+  ProviderAdapter,
+  LlmResponse,
+} from '../interfaces/provider-adapter.interface';
 import { ProviderCode } from '../../../../../shared/types';
 
 @Injectable()
@@ -25,7 +28,10 @@ export class GeminiAdapter implements ProviderAdapter {
     }
   }
 
-  async executeChatCompletion(apiKey: string, body: Record<string, unknown>): Promise<LlmResponse> {
+  async executeChatCompletion(
+    apiKey: string,
+    body: Record<string, unknown>,
+  ): Promise<LlmResponse> {
     try {
       // Extract model and map appropriately
       let model = (body.model as string | undefined) || 'gemini-1.5-flash';
@@ -34,7 +40,9 @@ export class GeminiAdapter implements ProviderAdapter {
         model = 'gemini-1.5-flash';
       }
 
-      const { contents, systemInstruction } = this.translateMessagesToGemini(body.messages);
+      const { contents, systemInstruction } = this.translateMessagesToGemini(
+        body.messages,
+      );
 
       const geminiBody: Record<string, unknown> = {
         contents,
@@ -70,7 +78,7 @@ export class GeminiAdapter implements ProviderAdapter {
         );
       }
 
-      const rawResponse = await response.json() as Record<string, unknown>;
+      const rawResponse = (await response.json()) as Record<string, unknown>;
       return this.normalizeGeminiResponse(rawResponse, model);
     } catch (err: unknown) {
       if (err instanceof HttpException) throw err;
@@ -82,7 +90,10 @@ export class GeminiAdapter implements ProviderAdapter {
     }
   }
 
-  private translateMessagesToGemini(messages: unknown): { contents: Record<string, unknown>[]; systemInstruction?: string } {
+  private translateMessagesToGemini(messages: unknown): {
+    contents: Record<string, unknown>[];
+    systemInstruction?: string;
+  } {
     const contents: Record<string, unknown>[] = [];
     let systemInstruction: string | undefined;
 
@@ -108,19 +119,32 @@ export class GeminiAdapter implements ProviderAdapter {
     return { contents, systemInstruction };
   }
 
-  private normalizeGeminiResponse(geminiRes: Record<string, unknown>, model: string): LlmResponse {
-    const candidates = geminiRes.candidates as Record<string, unknown>[] | undefined;
+  private normalizeGeminiResponse(
+    geminiRes: Record<string, unknown>,
+    model: string,
+  ): LlmResponse {
+    const candidates = geminiRes.candidates as
+      | Record<string, unknown>[]
+      | undefined;
     const firstCandidate = candidates?.[0];
-    const content = firstCandidate?.content as Record<string, unknown> | undefined;
+    const content = firstCandidate?.content as
+      | Record<string, unknown>
+      | undefined;
     const parts = content?.parts as Record<string, unknown>[] | undefined;
     const text = (parts?.[0]?.text as string | undefined) || '';
-    
-    const finishReason = firstCandidate?.finishReason === 'STOP' ? 'stop' : 'length';
-    
-    const usageMetadata = geminiRes.usageMetadata as Record<string, unknown> | undefined;
-    const promptTokens = (usageMetadata?.promptTokenCount as number | undefined) || 0;
-    const completionTokens = (usageMetadata?.candidatesTokenCount as number | undefined) || 0;
-    const totalTokens = (usageMetadata?.totalTokenCount as number | undefined) || 0;
+
+    const finishReason =
+      firstCandidate?.finishReason === 'STOP' ? 'stop' : 'length';
+
+    const usageMetadata = geminiRes.usageMetadata as
+      | Record<string, unknown>
+      | undefined;
+    const promptTokens =
+      (usageMetadata?.promptTokenCount as number | undefined) || 0;
+    const completionTokens =
+      (usageMetadata?.candidatesTokenCount as number | undefined) || 0;
+    const totalTokens =
+      (usageMetadata?.totalTokenCount as number | undefined) || 0;
 
     return {
       id: `chatcmpl-gemini-${Date.now()}`,

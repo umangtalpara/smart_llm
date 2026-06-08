@@ -4,7 +4,10 @@ import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { UsersModule } from '../users/users.module';
 import { ProvidersModule } from '../providers/providers.module';
-import { UsageStat, UsageStatSchema } from '../monitor/schemas/usage-stat.schema';
+import {
+  UsageStat,
+  UsageStatSchema,
+} from '../monitor/schemas/usage-stat.schema';
 import { ApiKey, ApiKeySchema } from '../api-keys/schemas/api-key.schema';
 
 @Module({

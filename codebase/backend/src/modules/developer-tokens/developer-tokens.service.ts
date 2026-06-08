@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  NotFoundException,
+} from '@nestjs/common';
 import * as crypto from 'crypto';
 import { DeveloperTokensRepository } from './developer-tokens.repository';
 import { UsersRepository } from '../users/users.repository';
@@ -47,7 +51,7 @@ export class DeveloperTokensService {
   async listTokens(userId: string): Promise<DeveloperToken[]> {
     const tokens = await this.tokenRepository.findByUser(userId);
     return tokens.map((t) => {
-      const obj = t.toObject({ virtuals: true }) as any;
+      const obj = t.toObject({ virtuals: true });
       if (obj._id && !obj.id) {
         obj.id = obj._id.toString();
       }
@@ -71,7 +75,7 @@ export class DeveloperTokensService {
   async validateToken(rawToken: string): Promise<UserDocument> {
     const tokenHash = this.hashToken(rawToken);
     const token = await this.tokenRepository.findByHash(tokenHash);
-    
+
     if (!token) {
       throw new UnauthorizedException('Invalid or expired developer token');
     }

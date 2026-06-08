@@ -6,7 +6,12 @@ export type RequestLogDocument = RequestLog & Document;
 
 @Schema({ timestamps: true })
 export class RequestLog {
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true, index: true })
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true,
+  })
   userId: MongooseSchema.Types.ObjectId | string;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'ApiKey', index: true })

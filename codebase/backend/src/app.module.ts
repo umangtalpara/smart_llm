@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BullModule } from '@nestjs/bullmq';
@@ -16,6 +16,8 @@ import { DeveloperTokensModule } from './modules/developer-tokens/developer-toke
 import { MailModule } from './modules/mail/mail.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { LoggingModule } from './common/logging/logging.module';
+import { RequestLoggingMiddleware } from './common/middleware/request-logging.middleware';
 
 @Module({
   imports: [
@@ -34,7 +36,10 @@ import { AppService } from './app.service';
     BullModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => {
-        const redisUrl = configService.get<string>('REDIS_URL', 'redis://localhost:6379');
+        const redisUrl = configService.get<string>(
+          'REDIS_URL',
+          'redis://localhost:6379',
+        );
         const isTls = redisUrl.startsWith('rediss://');
         try {
           const parsedUrl = new URL(redisUrl);
@@ -57,6 +62,7 @@ import { AppService } from './app.service';
       },
       inject: [ConfigService],
     }),
+    LoggingModule,
     RedisModule,
     MailModule,
     UsersModule,
@@ -72,4 +78,8 @@ import { AppService } from './app.service';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestLoggingMiddleware).forRoutes('*');
+  }
+}

@@ -1,5 +1,8 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { ProviderAdapter, LlmResponse } from '../interfaces/provider-adapter.interface';
+import {
+  ProviderAdapter,
+  LlmResponse,
+} from '../interfaces/provider-adapter.interface';
 import { ProviderCode } from '../../../../../shared/types';
 
 @Injectable()
@@ -35,20 +38,26 @@ export class ClaudeAdapter implements ProviderAdapter {
     }
   }
 
-  async executeChatCompletion(apiKey: string, body: Record<string, unknown>): Promise<LlmResponse> {
+  async executeChatCompletion(
+    apiKey: string,
+    body: Record<string, unknown>,
+  ): Promise<LlmResponse> {
     try {
-      let model = (body.model as string | undefined) || 'claude-3-5-sonnet-20240620';
+      let model =
+        (body.model as string | undefined) || 'claude-3-5-sonnet-20240620';
       if (!model.startsWith('claude')) {
         model = 'claude-3-5-sonnet-20240620';
       }
 
-      const { messages, system } = this.translateMessagesToClaude(body.messages);
+      const { messages, system } = this.translateMessagesToClaude(
+        body.messages,
+      );
 
       const claudeBody: Record<string, unknown> = {
         model,
         messages,
-        max_tokens: (body.max_tokens as number | undefined) ?? 1024,
-        temperature: (body.temperature as number | undefined) ?? 0.7,
+        max_tokens: body.max_tokens ?? 1024,
+        temperature: body.temperature ?? 0.7,
       };
 
       if (system) {
@@ -73,7 +82,7 @@ export class ClaudeAdapter implements ProviderAdapter {
         );
       }
 
-      const rawResponse = await response.json() as Record<string, unknown>;
+      const rawResponse = (await response.json()) as Record<string, unknown>;
       return this.normalizeClaudeResponse(rawResponse, model);
     } catch (err: unknown) {
       if (err instanceof HttpException) throw err;
@@ -85,7 +94,10 @@ export class ClaudeAdapter implements ProviderAdapter {
     }
   }
 
-  private translateMessagesToClaude(messages: unknown): { messages: Record<string, unknown>[]; system?: string } {
+  private translateMessagesToClaude(messages: unknown): {
+    messages: Record<string, unknown>[];
+    system?: string;
+  } {
     const claudeMessages: Record<string, unknown>[] = [];
     let system: string | undefined;
 
@@ -109,18 +121,22 @@ export class ClaudeAdapter implements ProviderAdapter {
     return { messages: claudeMessages, system };
   }
 
-  private normalizeClaudeResponse(claudeRes: Record<string, unknown>, model: string): LlmResponse {
+  private normalizeClaudeResponse(
+    claudeRes: Record<string, unknown>,
+    model: string,
+  ): LlmResponse {
     const content = claudeRes.content as Record<string, unknown>[] | undefined;
     const text = (content?.[0]?.text as string | undefined) || '';
-    const finishReason = claudeRes.stop_reason === 'end_turn' ? 'stop' : 'length';
-    
+    const finishReason =
+      claudeRes.stop_reason === 'end_turn' ? 'stop' : 'length';
+
     const usage = claudeRes.usage as Record<string, unknown> | undefined;
     const inputTokens = (usage?.input_tokens as number | undefined) || 0;
     const outputTokens = (usage?.output_tokens as number | undefined) || 0;
     const totalTokens = inputTokens + outputTokens;
 
     return {
-      id: `chatcmpl-claude-${claudeRes.id as string || Date.now()}`,
+      id: `chatcmpl-claude-${(claudeRes.id as string) || Date.now()}`,
       object: 'chat.completion',
       created: Math.floor(Date.now() / 1000),
       model,

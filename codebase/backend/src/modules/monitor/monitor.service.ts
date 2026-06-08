@@ -12,9 +12,12 @@ export class MonitorService {
   private readonly logger = new Logger(MonitorService.name);
 
   constructor(
-    @InjectModel(RequestLog.name) private readonly requestLogModel: Model<RequestLogDocument>,
-    @InjectModel(UsageStat.name) private readonly usageStatModel: Model<UsageStatDocument>,
-    @InjectModel(ApiKey.name) private readonly apiKeyModel: Model<ApiKeyDocument>,
+    @InjectModel(RequestLog.name)
+    private readonly requestLogModel: Model<RequestLogDocument>,
+    @InjectModel(UsageStat.name)
+    private readonly usageStatModel: Model<UsageStatDocument>,
+    @InjectModel(ApiKey.name)
+    private readonly apiKeyModel: Model<ApiKeyDocument>,
     private readonly redisService: RedisService,
   ) {}
 
@@ -27,7 +30,7 @@ export class MonitorService {
 
     // 2. Fetch usage stats total aggregates
     const stats = await this.usageStatModel.find({ userId });
-    
+
     let totalRequests = 0;
     let totalSuccess = 0;
     let totalTokens = 0;
@@ -38,7 +41,10 @@ export class MonitorService {
       totalTokens += stat.totalTokens;
     }
 
-    const successRate = totalRequests > 0 ? Math.round((totalSuccess / totalRequests) * 100) : 100;
+    const successRate =
+      totalRequests > 0
+        ? Math.round((totalSuccess / totalRequests) * 100)
+        : 100;
 
     return {
       totalRequests,
@@ -51,7 +57,7 @@ export class MonitorService {
   async getChartData(userId: string, days = 30) {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
-    const dateLimitStr = cutoffDate.toISOString().split('T')[0]!;
+    const dateLimitStr = cutoffDate.toISOString().split('T')[0];
 
     const stats = await this.usageStatModel
       .find({
@@ -61,7 +67,10 @@ export class MonitorService {
       .sort({ date: 1 });
 
     return stats.map((stat) => {
-      const avgLatencyMs = stat.successCount > 0 ? Math.round(stat.latencySumMs / stat.successCount) : 0;
+      const avgLatencyMs =
+        stat.successCount > 0
+          ? Math.round(stat.latencySumMs / stat.successCount)
+          : 0;
       return {
         date: stat.date,
         requests: stat.requestCount,
@@ -153,10 +162,11 @@ export class MonitorService {
       for (const key of keys) {
         // DB check
         const isDbCooldown = key.cooldownUntil && key.cooldownUntil > now;
-        
+
         // Redis check
         const redisCooldownKey = `key:cooldown:${key._id}`;
-        const isRedisCooldown = await this.redisService.exists(redisCooldownKey);
+        const isRedisCooldown =
+          await this.redisService.exists(redisCooldownKey);
 
         if (isDbCooldown || isRedisCooldown) {
           cooldownCount++;

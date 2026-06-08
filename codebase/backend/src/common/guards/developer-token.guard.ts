@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { DeveloperTokensService } from '../../modules/developer-tokens/developer-tokens.service';
 
 @Injectable()
@@ -16,7 +21,9 @@ export class DeveloperTokenGuard implements CanActivate {
     const [type, token] = authHeader.split(' ');
 
     if (type !== 'Bearer' || !token) {
-      throw new UnauthorizedException('Invalid authorization header format. Expected Bearer <token>');
+      throw new UnauthorizedException(
+        'Invalid authorization header format. Expected Bearer <token>',
+      );
     }
 
     try {
@@ -24,7 +31,8 @@ export class DeveloperTokenGuard implements CanActivate {
       request.user = user;
       return true;
     } catch (err: unknown) {
-      const errMsg = err instanceof Error ? err.message : 'Invalid developer token';
+      const errMsg =
+        err instanceof Error ? err.message : 'Invalid developer token';
       throw new UnauthorizedException(errMsg);
     }
   }

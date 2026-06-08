@@ -18,7 +18,12 @@ export class ProxyService {
     strategy: RotationStrategy = RotationStrategy.PRIORITY,
     group?: string,
   ): Promise<LlmResponse> {
-    return this.proxyChatService.executeProxyChatCompletion(userId, body, strategy, group);
+    return this.proxyChatService.executeProxyChatCompletion(
+      userId,
+      body,
+      strategy,
+      group,
+    );
   }
 
   async executeProxyEmbeddings(
@@ -27,7 +32,12 @@ export class ProxyService {
     strategy: RotationStrategy = RotationStrategy.PRIORITY,
     group?: string,
   ): Promise<LlmResponse> {
-    return this.proxyEmbeddingsService.executeProxyEmbeddings(userId, body, strategy, group);
+    return this.proxyEmbeddingsService.executeProxyEmbeddings(
+      userId,
+      body,
+      strategy,
+      group,
+    );
   }
 
   getSupportedModels() {

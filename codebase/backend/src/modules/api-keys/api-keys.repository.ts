@@ -7,7 +7,8 @@ import { KeyStatus, ProviderCode } from '../../../../shared/types';
 @Injectable()
 export class ApiKeysRepository {
   constructor(
-    @InjectModel(ApiKey.name) private readonly apiKeyModel: Model<ApiKeyDocument>,
+    @InjectModel(ApiKey.name)
+    private readonly apiKeyModel: Model<ApiKeyDocument>,
   ) {}
 
   async create(keyData: Partial<ApiKey>): Promise<ApiKeyDocument> {
@@ -26,7 +27,10 @@ export class ApiKeysRepository {
       .exec();
   }
 
-  async update(id: string, updates: Partial<ApiKey>): Promise<ApiKeyDocument | null> {
+  async update(
+    id: string,
+    updates: Partial<ApiKey>,
+  ): Promise<ApiKeyDocument | null> {
     return await this.apiKeyModel
       .findByIdAndUpdate(id, updates, { new: true })
       .exec();

@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { DeveloperToken, DeveloperTokenDocument } from './schemas/developer-token.schema';
+import {
+  DeveloperToken,
+  DeveloperTokenDocument,
+} from './schemas/developer-token.schema';
 
 @Injectable()
 export class DeveloperTokensRepository {
@@ -10,7 +13,9 @@ export class DeveloperTokensRepository {
     private readonly tokenModel: Model<DeveloperTokenDocument>,
   ) {}
 
-  async create(tokenData: Partial<DeveloperToken>): Promise<DeveloperTokenDocument> {
+  async create(
+    tokenData: Partial<DeveloperToken>,
+  ): Promise<DeveloperTokenDocument> {
     const newToken = new this.tokenModel(tokenData);
     return await newToken.save();
   }

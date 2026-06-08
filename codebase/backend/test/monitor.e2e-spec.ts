@@ -20,7 +20,8 @@ jest.mock('@nestjs/bullmq', () => {
       };
     },
     Processor: () => (target: any) => {},
-    Process: () => (target: any, key: string | symbol, descriptor: any) => descriptor,
+    Process: () => (target: any, key: string | symbol, descriptor: any) =>
+      descriptor,
     WorkerHost: MockWorkerHost,
     BullModule: {
       forRoot: () => ({
@@ -74,7 +75,9 @@ jest.mock('ioredis', () => {
     }
     options = { connectionName: 'mock-bullmq' };
     status = 'ready';
-    info() { return Promise.resolve('redis_version:7.0.0'); }
+    info() {
+      return Promise.resolve('redis_version:7.0.0');
+    }
     multi() {
       return {
         exec: () => Promise.resolve([]),
@@ -83,7 +86,9 @@ jest.mock('ioredis', () => {
     defineCommand(name: string, options: any) {
       (this as any)[name] = jest.fn().mockResolvedValue(null);
     }
-    client() { return Promise.resolve('OK'); }
+    client() {
+      return Promise.resolve('OK');
+    }
     quit() {
       process.nextTick(() => {
         this.emit('end');
@@ -205,14 +210,20 @@ describe('Monitor & Analytics Module (e2e)', () => {
       await logProcessor.process(mockJob);
 
       // Verify log was saved in RequestLog collection
-      const logs = await mongooseConnection.collection('requestlogs').find({ userId: new Types.ObjectId(userId) }).toArray();
+      const logs = await mongooseConnection
+        .collection('requestlogs')
+        .find({ userId: new Types.ObjectId(userId) })
+        .toArray();
       expect(logs.length).toBe(1);
       expect(logs[0].model).toBe('gpt-4o');
       expect(logs[0].durationMs).toBe(250);
       expect(logs[0].statusCode).toBe(200);
 
       // Verify aggregate stat was updated in UsageStat collection
-      const stats = await mongooseConnection.collection('usagestats').find({ userId: new Types.ObjectId(userId) }).toArray();
+      const stats = await mongooseConnection
+        .collection('usagestats')
+        .find({ userId: new Types.ObjectId(userId) })
+        .toArray();
       expect(stats.length).toBe(1);
       expect(stats[0].requestCount).toBe(1);
       expect(stats[0].successCount).toBe(1);
@@ -243,7 +254,10 @@ describe('Monitor & Analytics Module (e2e)', () => {
       await logProcessor.process(mockJob);
 
       // Verify aggregate stat counts
-      const stats = await mongooseConnection.collection('usagestats').find({ userId: new Types.ObjectId(userId) }).toArray();
+      const stats = await mongooseConnection
+        .collection('usagestats')
+        .find({ userId: new Types.ObjectId(userId) })
+        .toArray();
       expect(stats.length).toBe(1);
       // Daily aggregates should now combine: 1 success (250ms) + 1 fail (500ms) = 2 total requests
       expect(stats[0].requestCount).toBe(2);
@@ -274,7 +288,7 @@ describe('Monitor & Analytics Module (e2e)', () => {
       expect(res.status).toBe(200);
       expect(res.body).toBeInstanceOf(Array);
       expect(res.body.length).toBe(1); // Today's record
-      
+
       const todayRecord = res.body[0];
       expect(todayRecord.requests).toBe(2);
       expect(todayRecord.success).toBe(1);
@@ -292,12 +306,14 @@ describe('Monitor & Analytics Module (e2e)', () => {
       expect(res.body.total).toBe(2);
       expect(res.body.page).toBe(1);
       expect(res.body.data.length).toBe(2);
-      
+
       // Sorted by createdAt desc (newest first - Gemini)
       expect(res.body.data[0].provider).toBe(ProviderCode.GEMINI);
       expect(res.body.data[0].statusCode).toBe(429);
       expect(res.body.data[0].errorMsg).toBe('Rate Limit Reached');
-      expect(res.body.data[0].rotatedFromKeys).toContain('60c72b2f9b1d8b2a3c4d5e6f');
+      expect(res.body.data[0].rotatedFromKeys).toContain(
+        '60c72b2f9b1d8b2a3c4d5e6f',
+      );
 
       // Second log (oldest first - OpenAI)
       expect(res.body.data[1].provider).toBe(ProviderCode.OPENAI);

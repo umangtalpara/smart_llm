@@ -13,7 +13,7 @@ export interface LlmResponse {
 
 export interface ProviderAdapter {
   getProviderCode(): ProviderCode;
-  
+
   /**
    * Validate key connectivity with a minimal fast check request
    */
@@ -22,10 +22,16 @@ export interface ProviderAdapter {
   /**
    * Execute chat completions and normalize response to standard OpenAI format
    */
-  executeChatCompletion(apiKey: string, body: Record<string, unknown>): Promise<LlmResponse>;
+  executeChatCompletion(
+    apiKey: string,
+    body: Record<string, unknown>,
+  ): Promise<LlmResponse>;
 
   /**
    * Execute embeddings and normalize response to standard OpenAI format
    */
-  executeEmbeddings?(apiKey: string, body: Record<string, unknown>): Promise<LlmResponse>;
+  executeEmbeddings?(
+    apiKey: string,
+    body: Record<string, unknown>,
+  ): Promise<LlmResponse>;
 }

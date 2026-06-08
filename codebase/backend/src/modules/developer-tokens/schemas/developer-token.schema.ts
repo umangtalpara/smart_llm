@@ -36,7 +36,8 @@ export class DeveloperToken {
   lastUsedAt?: Date;
 }
 
-export const DeveloperTokenSchema = SchemaFactory.createForClass(DeveloperToken);
+export const DeveloperTokenSchema =
+  SchemaFactory.createForClass(DeveloperToken);
 
 // Compound index for fast queries by user and creation date
 DeveloperTokenSchema.index({ userId: 1, createdAt: -1 });

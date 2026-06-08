@@ -19,7 +19,8 @@ jest.mock('@nestjs/bullmq', () => {
       };
     },
     Processor: () => (target: any) => {},
-    Process: () => (target: any, key: string | symbol, descriptor: any) => descriptor,
+    Process: () => (target: any, key: string | symbol, descriptor: any) =>
+      descriptor,
     WorkerHost: MockWorkerHost,
     BullModule: {
       forRoot: () => ({
@@ -88,12 +89,14 @@ jest.mock('ioredis', () => {
             };
           }
           return undefined;
-        }
-      }) as any;
+        },
+      });
     }
     options = { connectionName: 'mock-bullmq' };
     status = 'ready';
-    info() { return Promise.resolve('redis_version:7.0.0'); }
+    info() {
+      return Promise.resolve('redis_version:7.0.0');
+    }
     multi() {
       return {
         exec: () => Promise.resolve([]),
@@ -102,7 +105,9 @@ jest.mock('ioredis', () => {
     defineCommand(name: string, options: any) {
       (this as any)[name] = jest.fn().mockResolvedValue(null);
     }
-    client() { return Promise.resolve('OK'); }
+    client() {
+      return Promise.resolve('OK');
+    }
     quit() {
       this.pendingPromises.forEach(({ resolve }) => resolve(null));
       this.pendingPromises = [];
@@ -135,7 +140,11 @@ const mockRedisStore: Record<string, string> = {};
 const mockRedisService = {
   onModuleInit: jest.fn().mockResolvedValue(undefined),
   onModuleDestroy: jest.fn().mockResolvedValue(undefined),
-  get: jest.fn().mockImplementation((key: string) => Promise.resolve(mockRedisStore[key] || null)),
+  get: jest
+    .fn()
+    .mockImplementation((key: string) =>
+      Promise.resolve(mockRedisStore[key] || null),
+    ),
   set: jest.fn().mockImplementation((key: string, val: string) => {
     mockRedisStore[key] = val;
     return Promise.resolve(undefined);
@@ -148,7 +157,11 @@ const mockRedisService = {
     delete mockRedisStore[key];
     return Promise.resolve(undefined);
   }),
-  exists: jest.fn().mockImplementation((key: string) => Promise.resolve(!!mockRedisStore[key])),
+  exists: jest
+    .fn()
+    .mockImplementation((key: string) =>
+      Promise.resolve(!!mockRedisStore[key]),
+    ),
   keys: jest.fn().mockResolvedValue([]),
 };
 
@@ -212,10 +225,12 @@ describe('Admin Panel & RBAC Modules (e2e)', () => {
     adminId = regAdminRes.body.user.id;
 
     // Promote the admin user directly in MongoDB
-    await mongooseConnection.collection('users').updateOne(
-      { _id: new Types.ObjectId(adminId) },
-      { $set: { role: UserRole.ADMIN } },
-    );
+    await mongooseConnection
+      .collection('users')
+      .updateOne(
+        { _id: new Types.ObjectId(adminId) },
+        { $set: { role: UserRole.ADMIN } },
+      );
   });
 
   afterAll(async () => {
@@ -296,12 +311,16 @@ describe('Admin Panel & RBAC Modules (e2e)', () => {
       expect(res.status).toBe(200);
       expect(res.body).toBeInstanceOf(Array);
       expect(res.body.length).toBeGreaterThan(0);
-      expect(res.body.find((p: any) => p.code === ProviderCode.OPENAI)).toBeDefined();
+      expect(
+        res.body.find((p: any) => p.code === ProviderCode.OPENAI),
+      ).toBeDefined();
     });
 
     it('should block proxy completion calls when provider is globally disabled', async () => {
       // 1. Verify openai starts as enabled
-      let isEnabled = await providersService.isProviderEnabled(ProviderCode.OPENAI);
+      let isEnabled = await providersService.isProviderEnabled(
+        ProviderCode.OPENAI,
+      );
       expect(isEnabled).toBe(true);
 
       // 2. Disable openai globally via Admin endpoint
@@ -341,7 +360,9 @@ describe('Admin Panel & RBAC Modules (e2e)', () => {
       expect(enableRes.body.status).toBe('active');
 
       // 2. Verify provider state in cache/service
-      const isEnabled = await providersService.isProviderEnabled(ProviderCode.OPENAI);
+      const isEnabled = await providersService.isProviderEnabled(
+        ProviderCode.OPENAI,
+      );
       expect(isEnabled).toBe(true);
     });
   });
@@ -351,7 +372,7 @@ describe('Admin Panel & RBAC Modules (e2e)', () => {
       // Seed statistics for Admin
       await mongooseConnection.collection('usagestats').insertOne({
         userId: new Types.ObjectId(adminId),
-        date: new Date().toISOString().split('T')[0]!,
+        date: new Date().toISOString().split('T')[0],
         requestCount: 5,
         successCount: 4,
         failCount: 1,
@@ -364,7 +385,7 @@ describe('Admin Panel & RBAC Modules (e2e)', () => {
       // Seed statistics for User
       await mongooseConnection.collection('usagestats').insertOne({
         userId: new Types.ObjectId(userId),
-        date: new Date().toISOString().split('T')[0]!,
+        date: new Date().toISOString().split('T')[0],
         requestCount: 3,
         successCount: 3,
         failCount: 0,
@@ -380,7 +401,7 @@ describe('Admin Panel & RBAC Modules (e2e)', () => {
 
       expect(res.status).toBe(200);
       expect(res.body.metrics).toBeDefined();
-      
+
       // Total Requests: 5 + 3 = 8
       expect(res.body.metrics.totalRequests).toBe(8);
       // Total Success: 4 + 3 = 7

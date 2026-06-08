@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, Logger, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  Logger,
+  OnModuleInit,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ProviderAdapter } from './interfaces/provider-adapter.interface';
@@ -21,7 +26,8 @@ export class ProvidersService implements OnModuleInit {
   private readonly adapters = new Map<ProviderCode, ProviderAdapter>();
 
   constructor(
-    @InjectModel(Provider.name) private readonly providerModel: Model<ProviderDocument>,
+    @InjectModel(Provider.name)
+    private readonly providerModel: Model<ProviderDocument>,
     private readonly redisService: RedisService,
     private readonly openaiAdapter: OpenAIAdapter,
     private readonly geminiAdapter: GeminiAdapter,
@@ -43,8 +49,10 @@ export class ProvidersService implements OnModuleInit {
     this.adapters.set(ProviderCode.MISTRAL, this.mistralAdapter);
     this.adapters.set(ProviderCode.CEREBRAS, this.cerebrasAdapter);
     this.adapters.set(ProviderCode.CAMBERCLOUD, this.cambercloudAdapter);
-    
-    this.logger.log(`Registered ${this.adapters.size} provider adapters successfully.`);
+
+    this.logger.log(
+      `Registered ${this.adapters.size} provider adapters successfully.`,
+    );
   }
 
   async onModuleInit() {
@@ -52,21 +60,69 @@ export class ProvidersService implements OnModuleInit {
       await this.seedProviders();
       await this.syncRedisStatus();
     } catch (err: any) {
-      this.logger.error(`Failed to initialize providers database and cache: ${err.message}`, err.stack);
+      this.logger.error(
+        `Failed to initialize providers database and cache: ${err.message}`,
+        err.stack,
+      );
     }
   }
 
   private async seedProviders() {
     const supported = [
-      { name: 'OpenAI', code: ProviderCode.OPENAI, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
-      { name: 'Google Gemini', code: ProviderCode.GEMINI, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
-      { name: 'Anthropic Claude', code: ProviderCode.CLAUDE, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
-      { name: 'Groq', code: ProviderCode.GROQ, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
-      { name: 'xAI Grok', code: ProviderCode.GROK, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
-      { name: 'OpenRouter', code: ProviderCode.OPENROUTER, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
-      { name: 'Mistral AI', code: ProviderCode.MISTRAL, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
-      { name: 'Cerebras', code: ProviderCode.CEREBRAS, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
-      { name: 'Cambercloud', code: ProviderCode.CAMBERCLOUD, defaultRpmLimit: 10000, defaultTpmLimit: 1000000 },
+      {
+        name: 'OpenAI',
+        code: ProviderCode.OPENAI,
+        defaultRpmLimit: 10000,
+        defaultTpmLimit: 1000000,
+      },
+      {
+        name: 'Google Gemini',
+        code: ProviderCode.GEMINI,
+        defaultRpmLimit: 10000,
+        defaultTpmLimit: 1000000,
+      },
+      {
+        name: 'Anthropic Claude',
+        code: ProviderCode.CLAUDE,
+        defaultRpmLimit: 10000,
+        defaultTpmLimit: 1000000,
+      },
+      {
+        name: 'Groq',
+        code: ProviderCode.GROQ,
+        defaultRpmLimit: 10000,
+        defaultTpmLimit: 1000000,
+      },
+      {
+        name: 'xAI Grok',
+        code: ProviderCode.GROK,
+        defaultRpmLimit: 10000,
+        defaultTpmLimit: 1000000,
+      },
+      {
+        name: 'OpenRouter',
+        code: ProviderCode.OPENROUTER,
+        defaultRpmLimit: 10000,
+        defaultTpmLimit: 1000000,
+      },
+      {
+        name: 'Mistral AI',
+        code: ProviderCode.MISTRAL,
+        defaultRpmLimit: 10000,
+        defaultTpmLimit: 1000000,
+      },
+      {
+        name: 'Cerebras',
+        code: ProviderCode.CEREBRAS,
+        defaultRpmLimit: 10000,
+        defaultTpmLimit: 1000000,
+      },
+      {
+        name: 'Cambercloud',
+        code: ProviderCode.CAMBERCLOUD,
+        defaultRpmLimit: 10000,
+        defaultTpmLimit: 1000000,
+      },
     ];
 
     for (const p of supported) {
@@ -107,11 +163,14 @@ export class ProvidersService implements OnModuleInit {
     return this.providerModel.find({});
   }
 
-  async updateProviderStatus(provider: ProviderCode, status: 'active' | 'inactive') {
+  async updateProviderStatus(
+    provider: ProviderCode,
+    status: 'active' | 'inactive',
+  ) {
     const doc = await this.providerModel.findOneAndUpdate(
       { code: provider },
       { $set: { status } },
-      { new: true }
+      { new: true },
     );
     if (!doc) {
       throw new NotFoundException(`Provider ${provider} not found`);
@@ -131,7 +190,9 @@ export class ProvidersService implements OnModuleInit {
   getAdapter(provider: ProviderCode): ProviderAdapter {
     const adapter = this.adapters.get(provider);
     if (!adapter) {
-      throw new NotFoundException(`No provider adapter registered for ${provider}`);
+      throw new NotFoundException(
+        `No provider adapter registered for ${provider}`,
+      );
     }
     return adapter;
   }

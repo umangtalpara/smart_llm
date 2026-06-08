@@ -1,5 +1,19 @@
-import { Controller, Get, Patch, Query, Param, UseGuards, Sse, MessageEvent } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Patch,
+  Query,
+  Param,
+  UseGuards,
+  Sse,
+  MessageEvent,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { GetUser } from '../../common/decorators/get-user.decorator';
@@ -14,14 +28,20 @@ export class NotificationsController {
 
   @Sse('sse')
   @ApiOperation({ summary: 'Stream real-time notifications' })
-  @ApiResponse({ status: 200, description: 'Real-time Server-Sent Events stream' })
+  @ApiResponse({
+    status: 200,
+    description: 'Real-time Server-Sent Events stream',
+  })
   sse(@GetUser('id') userId: string): Observable<MessageEvent> {
-    return this.notificationsService.getNotificationStream(userId) as unknown as Observable<MessageEvent>;
+    return this.notificationsService.getNotificationStream(userId);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get paginated notifications inbox' })
-  @ApiResponse({ status: 200, description: 'Paginated notification list returned' })
+  @ApiResponse({
+    status: 200,
+    description: 'Paginated notification list returned',
+  })
   async getNotifications(
     @GetUser('id') userId: string,
     @Query('page') page?: string,

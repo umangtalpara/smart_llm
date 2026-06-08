@@ -1,5 +1,8 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
-import { ProviderAdapter, LlmResponse } from '../interfaces/provider-adapter.interface';
+import {
+  ProviderAdapter,
+  LlmResponse,
+} from '../interfaces/provider-adapter.interface';
 import { ProviderCode } from '../../../../../shared/types';
 
 @Injectable()
@@ -31,7 +34,10 @@ export class CambercloudAdapter implements ProviderAdapter {
     }
   }
 
-  async executeChatCompletion(apiKey: string, body: Record<string, unknown>): Promise<LlmResponse> {
+  async executeChatCompletion(
+    apiKey: string,
+    body: Record<string, unknown>,
+  ): Promise<LlmResponse> {
     try {
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
@@ -50,7 +56,7 @@ export class CambercloudAdapter implements ProviderAdapter {
         );
       }
 
-      return await response.json() as LlmResponse;
+      return (await response.json()) as LlmResponse;
     } catch (err: unknown) {
       if (err instanceof HttpException) throw err;
       const errMsg = err instanceof Error ? err.message : String(err);

@@ -11,13 +11,17 @@ export class LogProcessor extends WorkerHost {
   private readonly logger = new Logger(LogProcessor.name);
 
   constructor(
-    @InjectModel(RequestLog.name) private readonly requestLogModel: Model<RequestLogDocument>,
-    @InjectModel(UsageStat.name) private readonly usageStatModel: Model<UsageStatDocument>,
+    @InjectModel(RequestLog.name)
+    private readonly requestLogModel: Model<RequestLogDocument>,
+    @InjectModel(UsageStat.name)
+    private readonly usageStatModel: Model<UsageStatDocument>,
   ) {
     super();
   }
 
-  async process(job: Job<Record<string, unknown>, unknown, string>): Promise<void> {
+  async process(
+    job: Job<Record<string, unknown>, unknown, string>,
+  ): Promise<void> {
     const userId = job.data.userId as string | undefined;
     const apiKeyId = job.data.apiKeyId as string | undefined;
     const provider = job.data.provider as string | undefined;
@@ -53,7 +57,7 @@ export class LogProcessor extends WorkerHost {
 
       // 2. Aggregate Daily UsageStat
       const isSuccess = statusCode >= 200 && statusCode < 300;
-      const dateStr = new Date().toISOString().split('T')[0]!; // YYYY-MM-DD
+      const dateStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
       await this.usageStatModel.updateOne(
         { userId, date: dateStr },
@@ -63,16 +67,18 @@ export class LogProcessor extends WorkerHost {
             successCount: isSuccess ? 1 : 0,
             failCount: isSuccess ? 0 : 1,
             totalTokens: totalTokens || 0,
-            latencySumMs: isSuccess ? (durationMs || 0) : 0,
+            latencySumMs: isSuccess ? durationMs || 0 : 0,
           },
         },
         { upsert: true },
       );
-
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : String(err);
       const errStack = err instanceof Error ? err.stack : undefined;
-      this.logger.error(`Failed to process request log job ${job.id}: ${errMsg}`, errStack);
+      this.logger.error(
+        `Failed to process request log job ${job.id}: ${errMsg}`,
+        errStack,
+      );
       throw err;
     }
   }

@@ -3,7 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UsersRepository } from '../users/users.repository';
 import { ProvidersService } from '../providers/providers.service';
-import { UsageStat, UsageStatDocument } from '../monitor/schemas/usage-stat.schema';
+import {
+  UsageStat,
+  UsageStatDocument,
+} from '../monitor/schemas/usage-stat.schema';
 import { ApiKey, ApiKeyDocument } from '../api-keys/schemas/api-key.schema';
 import { KeyStatus, ProviderCode, UserRole } from '../../../../shared/types';
 
@@ -14,8 +17,10 @@ export class AdminService {
   constructor(
     private readonly usersRepository: UsersRepository,
     private readonly providersService: ProvidersService,
-    @InjectModel(UsageStat.name) private readonly usageStatModel: Model<UsageStatDocument>,
-    @InjectModel(ApiKey.name) private readonly apiKeyModel: Model<ApiKeyDocument>,
+    @InjectModel(UsageStat.name)
+    private readonly usageStatModel: Model<UsageStatDocument>,
+    @InjectModel(ApiKey.name)
+    private readonly apiKeyModel: Model<ApiKeyDocument>,
   ) {}
 
   async getUsers(page = 1, limit = 20) {
@@ -112,7 +117,7 @@ export class AdminService {
     // 3. Fetch system-wide daily aggregate chart data
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
-    const dateLimitStr = cutoffDate.toISOString().split('T')[0]!;
+    const dateLimitStr = cutoffDate.toISOString().split('T')[0];
 
     const dailyStats = await this.usageStatModel.aggregate([
       { $match: { date: { $gte: dateLimitStr } } },
@@ -136,7 +141,8 @@ export class AdminService {
       success: stat.success,
       failed: stat.failed,
       tokens: stat.tokens,
-      avgLatencyMs: stat.success > 0 ? Math.round(stat.latencySumMs / stat.success) : 0,
+      avgLatencyMs:
+        stat.success > 0 ? Math.round(stat.latencySumMs / stat.success) : 0,
     }));
 
     return {
@@ -156,7 +162,10 @@ export class AdminService {
     return this.providersService.getAllProviders();
   }
 
-  async updateProviderStatus(provider: ProviderCode, status: 'active' | 'inactive') {
+  async updateProviderStatus(
+    provider: ProviderCode,
+    status: 'active' | 'inactive',
+  ) {
     return this.providersService.updateProviderStatus(provider, status);
   }
 }

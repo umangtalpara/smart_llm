@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Notification, NotificationDocument, NotificationType, NotificationSeverity } from './schemas/notification.schema';
+import {
+  Notification,
+  NotificationDocument,
+  NotificationType,
+  NotificationSeverity,
+} from './schemas/notification.schema';
 import { Subject } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -18,7 +23,10 @@ export interface MappedNotification {
 
 @Injectable()
 export class NotificationsService {
-  private readonly notificationSubject = new Subject<{ userId: string; notification: MappedNotification }>();
+  private readonly notificationSubject = new Subject<{
+    userId: string;
+    notification: MappedNotification;
+  }>();
 
   constructor(
     @InjectModel(Notification.name)

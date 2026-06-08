@@ -1,4 +1,9 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, RedisClientType } from 'redis';
 
@@ -21,7 +26,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         },
         tls: isTls ? true : undefined,
         rejectUnauthorized: isTls ? false : undefined,
-      }
+      },
     });
 
     this.client.on('error', (err) => {
@@ -35,7 +40,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     try {
       await this.client.connect();
     } catch (err: any) {
-      this.logger.warn(`Could not establish initial connection to Redis: ${err.message}. Running in degraded mode without cache.`);
+      this.logger.warn(
+        `Could not establish initial connection to Redis: ${err.message}. Running in degraded mode without cache.`,
+      );
     }
   }
 
@@ -67,7 +74,11 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  async setWithTtl(key: string, value: string, ttlSeconds: number): Promise<void> {
+  async setWithTtl(
+    key: string,
+    value: string,
+    ttlSeconds: number,
+  ): Promise<void> {
     try {
       await this.client.setEx(key, ttlSeconds, value);
     } catch (err: any) {
@@ -88,7 +99,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       const count = await this.client.exists(key);
       return count > 0;
     } catch (err: any) {
-      this.logger.error(`Failed to CHECK EXISTS of key ${key} in Redis: ${err.message}`);
+      this.logger.error(
+        `Failed to CHECK EXISTS of key ${key} in Redis: ${err.message}`,
+      );
       return false;
     }
   }
@@ -97,7 +110,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     try {
       return await this.client.keys(pattern);
     } catch (err: any) {
-      this.logger.error(`Failed to FETCH KEYS with pattern ${pattern} from Redis: ${err.message}`);
+      this.logger.error(
+        `Failed to FETCH KEYS with pattern ${pattern} from Redis: ${err.message}`,
+      );
       return [];
     }
   }

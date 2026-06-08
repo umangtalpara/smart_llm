@@ -9,7 +9,13 @@ export class Provider {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ type: String, required: true, unique: true, enum: ProviderCode, index: true })
+  @Prop({
+    type: String,
+    required: true,
+    unique: true,
+    enum: ProviderCode,
+    index: true,
+  })
   code: ProviderCode;
 
   @Prop({ required: true, default: 'active', enum: ['active', 'inactive'] })

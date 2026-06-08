@@ -56,8 +56,13 @@ export class ProxyEmbeddingsService {
 
     while (attempts < maxAttempts) {
       attempts++;
-      
-      const key = await this.keySelectorService.selectKey(userId, provider, group, strategy);
+
+      const key = await this.keySelectorService.selectKey(
+        userId,
+        provider,
+        group,
+        strategy,
+      );
       if (!key) {
         const durationMs = Date.now() - startTime;
         await this.publishRequestLog(
@@ -85,11 +90,16 @@ export class ProxyEmbeddingsService {
       );
 
       try {
-        const decryptedKey = await this.apiKeysService.getDecryptedKeyValue(userId, key.id);
+        const decryptedKey = await this.apiKeysService.getDecryptedKeyValue(
+          userId,
+          key.id,
+        );
         const adapter = this.providersService.getAdapter(provider);
 
         if (!adapter.executeEmbeddings) {
-          throw new BadRequestException(`Provider ${provider} does not support embeddings.`);
+          throw new BadRequestException(
+            `Provider ${provider} does not support embeddings.`,
+          );
         }
 
         const response = await adapter.executeEmbeddings(decryptedKey, body);
@@ -123,8 +133,9 @@ export class ProxyEmbeddingsService {
         errors.push(err);
         rotatedFromKeys.push(key.id);
         const status = err instanceof HttpException ? err.getStatus() : 500;
-        const errMsg = err instanceof Error ? err.message : 'Unknown provider error';
-        
+        const errMsg =
+          err instanceof Error ? err.message : 'Unknown provider error';
+
         this.logger.warn(
           `Key ${key.name} (${key.keyMask}) failed with status ${status}: ${errMsg}`,
         );
@@ -135,8 +146,10 @@ export class ProxyEmbeddingsService {
 
     const durationMs = Date.now() - startTime;
     const lastError = errors[errors.length - 1];
-    const status = lastError instanceof HttpException ? lastError.getStatus() : 500;
-    const errMsg = lastError instanceof Error ? lastError.message : 'Unknown failure';
+    const status =
+      lastError instanceof HttpException ? lastError.getStatus() : 500;
+    const errMsg =
+      lastError instanceof Error ? lastError.message : 'Unknown failure';
 
     await this.publishRequestLog(
       userId,
@@ -193,7 +206,9 @@ export class ProxyEmbeddingsService {
       });
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : String(err);
-      this.logger.error(`Failed to publish request log job to BullMQ: ${errMsg}`);
+      this.logger.error(
+        `Failed to publish request log job to BullMQ: ${errMsg}`,
+      );
     }
   }
 }

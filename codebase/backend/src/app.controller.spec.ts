@@ -37,7 +37,9 @@ describe('AppController', () => {
 
   describe('root', () => {
     it('should return welcome message', () => {
-      expect(appController.getWelcome().message).toBe('Welcome to the ProxyLLM API Gateway!');
+      expect(appController.getWelcome().message).toBe(
+        'Welcome to the ProxyLLM API Gateway!',
+      );
     });
   });
 });

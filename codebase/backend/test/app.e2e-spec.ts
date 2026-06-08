@@ -15,7 +15,8 @@ jest.mock('@nestjs/bullmq', () => {
       };
     },
     Processor: () => (target: any) => {},
-    Process: () => (target: any, key: string | symbol, descriptor: any) => descriptor,
+    Process: () => (target: any, key: string | symbol, descriptor: any) =>
+      descriptor,
     WorkerHost: MockWorkerHost,
     BullModule: {
       forRoot: () => ({
@@ -69,7 +70,9 @@ jest.mock('ioredis', () => {
     }
     options = { connectionName: 'mock-bullmq' };
     status = 'ready';
-    info() { return Promise.resolve('redis_version:7.0.0'); }
+    info() {
+      return Promise.resolve('redis_version:7.0.0');
+    }
     multi() {
       return {
         exec: () => Promise.resolve([]),
@@ -78,7 +81,9 @@ jest.mock('ioredis', () => {
     defineCommand(name: string, options: any) {
       (this as any)[name] = jest.fn().mockResolvedValue(null);
     }
-    client() { return Promise.resolve('OK'); }
+    client() {
+      return Promise.resolve('OK');
+    }
     quit() {
       process.nextTick(() => {
         this.emit('end');

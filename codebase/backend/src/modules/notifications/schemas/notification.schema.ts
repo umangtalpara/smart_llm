@@ -18,7 +18,12 @@ export enum NotificationSeverity {
 
 @Schema({ timestamps: true })
 export class Notification {
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true, index: true })
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true,
+  })
   userId: MongooseSchema.Types.ObjectId | string;
 
   @Prop({ required: true, enum: NotificationType })
@@ -30,7 +35,11 @@ export class Notification {
   @Prop({ required: true })
   message: string;
 
-  @Prop({ required: true, enum: NotificationSeverity, default: NotificationSeverity.INFO })
+  @Prop({
+    required: true,
+    enum: NotificationSeverity,
+    default: NotificationSeverity.INFO,
+  })
   severity: NotificationSeverity;
 
   @Prop({ default: false, index: true })

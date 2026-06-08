@@ -20,12 +20,12 @@ export class EncryptionService {
     try {
       const iv = crypto.randomBytes(12); // 96-bit IV is standard for GCM
       const cipher = crypto.createCipheriv(this.algorithm, this.key, iv);
-      
+
       let encrypted = cipher.update(text, 'utf8', 'hex');
       encrypted += cipher.final('hex');
-      
+
       const authTag = cipher.getAuthTag().toString('hex');
-      
+
       // Combine IV, AuthTag and Encrypted Data
       return `${iv.toString('hex')}:${authTag}:${encrypted}`;
     } catch (err: unknown) {
@@ -42,9 +42,9 @@ export class EncryptionService {
         throw new Error('Invalid encrypted format');
       }
 
-      const iv = Buffer.from(parts[0]!, 'hex');
-      const authTag = Buffer.from(parts[1]!, 'hex');
-      const encryptedData = parts[2]!;
+      const iv = Buffer.from(parts[0], 'hex');
+      const authTag = Buffer.from(parts[1], 'hex');
+      const encryptedData = parts[2];
 
       const decipher = crypto.createDecipheriv(this.algorithm, this.key, iv);
       decipher.setAuthTag(authTag);

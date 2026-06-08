@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
@@ -28,7 +33,7 @@ export class AuthService {
 
   async register(dto: RegisterDto) {
     const passwordHash = await bcrypt.hash(dto.password, this.bcryptSaltRounds);
-    
+
     const user = await this.usersRepository.create({
       email: dto.email,
       name: dto.name,
@@ -56,7 +61,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordValid = await bcrypt.compare(dto.password, user.passwordHash);
+    const isPasswordValid = await bcrypt.compare(
+      dto.password,
+      user.passwordHash,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -77,21 +85,30 @@ export class AuthService {
   async refresh(refreshToken: string) {
     try {
       const secret = this.configService.get<string>('JWT_SECRET');
-      const payload: JwtPayload = await this.jwtService.verifyAsync(refreshToken, { secret });
+      const payload: JwtPayload = await this.jwtService.verifyAsync(
+        refreshToken,
+        { secret },
+      );
 
       // Retrieve stored refresh token from Redis
       const redisKey = `user:${payload.sub}:refresh_token`;
       const storedToken = await this.redisService.get(redisKey);
 
       if (!storedToken) {
-        throw new UnauthorizedException('Session has expired. Please log in again.');
+        throw new UnauthorizedException(
+          'Session has expired. Please log in again.',
+        );
       }
 
       if (storedToken !== refreshToken) {
         // Detect possible token reuse/theft attack!
         await this.redisService.del(redisKey); // Revoke session completely
-        this.logger.warn(`Refresh token reuse detected for user ${payload.sub}. Revoking all sessions.`);
-        throw new UnauthorizedException('Access denied. Security breach detected.');
+        this.logger.warn(
+          `Refresh token reuse detected for user ${payload.sub}. Revoking all sessions.`,
+        );
+        throw new UnauthorizedException(
+          'Access denied. Security breach detected.',
+        );
       }
 
       // Check if user still exists
@@ -121,17 +138,23 @@ export class AuthService {
     const payload: JwtPayload = { sub: userId, email, role };
 
     const accessToken = await this.jwtService.signAsync(payload, {
-      expiresIn: (this.configService.get<string>('JWT_ACCESS_EXPIRY') || '15m') as unknown as number,
+      expiresIn: (this.configService.get<string>('JWT_ACCESS_EXPIRY') ||
+        '15m') as unknown as number,
     });
 
     const refreshToken = await this.jwtService.signAsync(payload, {
-      expiresIn: (this.configService.get<string>('JWT_REFRESH_EXPIRY') || '7d') as unknown as number,
+      expiresIn: (this.configService.get<string>('JWT_REFRESH_EXPIRY') ||
+        '7d') as unknown as number,
     });
 
     // Store refresh token in Redis with a 7-day expiry (matching refresh token default)
     const redisKey = `user:${userId}:refresh_token`;
     const sevenDaysInSeconds = 7 * 24 * 60 * 60;
-    await this.redisService.setWithTtl(redisKey, refreshToken, sevenDaysInSeconds);
+    await this.redisService.setWithTtl(
+      redisKey,
+      refreshToken,
+      sevenDaysInSeconds,
+    );
 
     return {
       accessToken,
@@ -143,8 +166,13 @@ export class AuthService {
     const user = await this.usersRepository.findByEmail(dto.email);
     if (!user) {
       // Return success even if email is not found to prevent user enumeration
-      this.logger.log(`Forgot password request for non-existent email: ${dto.email}`);
-      return { success: true, message: 'If the email exists, a reset link has been sent.' };
+      this.logger.log(
+        `Forgot password request for non-existent email: ${dto.email}`,
+      );
+      return {
+        success: true,
+        message: 'If the email exists, a reset link has been sent.',
+      };
     }
 
     const token = crypto.randomBytes(32).toString('hex');
@@ -154,7 +182,11 @@ export class AuthService {
     await this.usersRepository.updateResetToken(user.id, token, expires);
 
     try {
-      await this.mailService.sendResetPasswordEmail(user.email, user.name, token);
+      await this.mailService.sendResetPasswordEmail(
+        user.email,
+        user.name,
+        token,
+      );
     } catch (error) {
       // Clean up token if email fails to send
       await this.usersRepository.updateResetToken(user.id, null, null);

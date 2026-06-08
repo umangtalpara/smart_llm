@@ -19,7 +19,11 @@ export class KeySelectorService {
     excludeIds: string[] = [],
   ): Promise<ApiKeyDocument | null> {
     // 1. Fetch active keys from repository
-    const activeKeys = await this.apiKeysRepository.findActiveKeys(userId, provider, group);
+    const activeKeys = await this.apiKeysRepository.findActiveKeys(
+      userId,
+      provider,
+      group,
+    );
     if (activeKeys.length === 0) {
       return null;
     }
@@ -57,7 +61,11 @@ export class KeySelectorService {
       case RotationStrategy.ROUND_ROBIN:
         return await this.applyRoundRobin(userId, provider, availableKeys);
       case RotationStrategy.PRIORITY:
-        return await this.applyPriorityRotation(userId, provider, availableKeys);
+        return await this.applyPriorityRotation(
+          userId,
+          provider,
+          availableKeys,
+        );
       case RotationStrategy.HEALTH_BASED:
         return this.applyHealthBasedRotation(availableKeys);
       case RotationStrategy.WEIGHTED:
@@ -80,7 +88,7 @@ export class KeySelectorService {
     await this.redisService.set(redisKeyIndex, nextIndex.toString());
 
     // Safe non-null assertion since nextIndex is bounded by length
-    return keys[nextIndex]!;
+    return keys[nextIndex];
   }
 
   private async applyPriorityRotation(
@@ -90,10 +98,16 @@ export class KeySelectorService {
   ): Promise<ApiKeyDocument> {
     // Keys are already sorted by priority descending from repository.
     // Group keys by their priority, select the highest available, and Round Robin within that subset.
-    const highestPriority = keys[0]!.priority;
-    const highestPriorityKeys = keys.filter((k) => k.priority === highestPriority);
+    const highestPriority = keys[0].priority;
+    const highestPriorityKeys = keys.filter(
+      (k) => k.priority === highestPriority,
+    );
 
-    return await this.applyRoundRobin(userId, `${provider}:prio:${highestPriority}`, highestPriorityKeys);
+    return await this.applyRoundRobin(
+      userId,
+      `${provider}:prio:${highestPriority}`,
+      highestPriorityKeys,
+    );
   }
 
   private applyHealthBasedRotation(keys: ApiKeyDocument[]): ApiKeyDocument {
@@ -106,7 +120,7 @@ export class KeySelectorService {
       const rateB = totalB > 0 ? b.errorCount / totalB : 0;
       return rateA - rateB;
     });
-    return sorted[0]!;
+    return sorted[0];
   }
 
   private applyWeightedRotation(keys: ApiKeyDocument[]): ApiKeyDocument {
@@ -121,6 +135,6 @@ export class KeySelectorService {
       }
     }
 
-    return keys[0]!;
+    return keys[0];
   }
 }

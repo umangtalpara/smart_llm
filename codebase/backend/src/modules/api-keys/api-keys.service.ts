@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { ApiKeysRepository } from './api-keys.repository';
 import { EncryptionService } from './encryption.service';
 import { CreateApiKeyDto } from './dto/create-api-key.dto';
@@ -23,7 +29,7 @@ export class ApiKeysService {
     const isValid = await adapter.validateKey(dto.apiKey);
     if (!isValid) {
       throw new BadRequestException(
-        `The API key provided is invalid, expired, or could not connect to ${dto.provider}.`
+        `The API key provided is invalid, expired, or could not connect to ${dto.provider}.`,
       );
     }
 
@@ -67,7 +73,11 @@ export class ApiKeysService {
     return this.stripSecret(key);
   }
 
-  async update(userId: string, id: string, dto: UpdateApiKeyDto): Promise<ApiKeyDocument> {
+  async update(
+    userId: string,
+    id: string,
+    dto: UpdateApiKeyDto,
+  ): Promise<ApiKeyDocument> {
     const key = await this.apiKeysRepository.findById(id);
     if (!key) {
       throw new NotFoundException('API Key not found');
@@ -93,7 +103,7 @@ export class ApiKeysService {
       const isValid = await adapter.validateKey(dto.apiKey);
       if (!isValid) {
         throw new BadRequestException(
-          `The API key provided is invalid, expired, or could not connect to ${key.provider}.`
+          `The API key provided is invalid, expired, or could not connect to ${key.provider}.`,
         );
       }
       updates.encryptedKey = this.encryptionService.encrypt(dto.apiKey);
@@ -104,7 +114,10 @@ export class ApiKeysService {
     return this.stripSecret(updatedKey!);
   }
 
-  async delete(userId: string, id: string): Promise<{ success: boolean; message: string }> {
+  async delete(
+    userId: string,
+    id: string,
+  ): Promise<{ success: boolean; message: string }> {
     const key = await this.apiKeysRepository.findById(id);
     if (!key) {
       throw new NotFoundException('API Key not found');

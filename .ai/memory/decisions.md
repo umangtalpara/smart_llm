@@ -8,44 +8,49 @@
 
 | ID | Date | Decision | Rationale | Status |
 |----|------|----------|-----------|--------|
-| — | — | No decisions recorded yet | Project initialized, awaiting PRD | — |
+| ADR-001 | 2026-06-08 | Datadog Logging Integration | Implemented structured logging (JSON in production, colored text in development) and direct buffered HTTP logs intake forwarding. | Accepted |
 
 ---
 
-## Decision Template
+## Decisions
 
-### ADR-XXX: [Decision Title]
+### ADR-001: Datadog Logging Integration
 
-**Date**: YYYY-MM-DD  
-**Status**: Proposed | Accepted | Deprecated | Superseded  
-**Decider**: [Agent Name]  
-**Phase**: PHASE-XX
+**Date**: 2026-06-08  
+**Status**: Accepted  
+**Decider**: Antigravity (AI Coding Assistant)  
+**Phase**: Phase 4 / Logging & Monitoring
 
 #### Context
 
-What is the technical problem or choice that needs to be made?
+The application required a structured logging solution that integrates seamlessly with Datadog. The logs needed to capture request metadata, handled and unhandled errors, and request execution times in a standardized format to facilitate easy log analysis and system monitoring.
 
 #### Decision
 
-What is the chosen solution?
+We implemented a custom, zero-dependency `DatadogLoggerService` that implements NestJS's standard `LoggerService` interface.
+- In **development** mode, it outputs colored, human-readable terminal logs.
+- In **production** or **staging** modes, it writes structured JSON logs to stdout/stderr.
+- If `DD_API_KEY` is provided, it asynchronously forwards log payloads in batches of up to 10 logs (or every 2 seconds) directly to Datadog's HTTPS Logs Intake endpoint (`https://http-intake.logs.<DD_SITE>/api/v2/logs`) using Node.js's native `https` module to avoid performance blocks or external library dependencies.
+- We also added a global `RequestLoggingMiddleware` that generates a unique `requestId` per request, attaches it to the request context, and logs sanitised request parameters and response latency.
+- The global `HttpExceptionFilter` was updated to log exceptions using this logger, correlating error details with the corresponding `requestId`.
 
 #### Alternatives Considered
 
-1. **Alternative A**: Description — rejected because...
-2. **Alternative B**: Description — rejected because...
+1. **Winston with winston-datadog transport**: Rejected because it pulls in heavy external dependencies (`winston`, `@types/winston`, transport libraries) which can cause dependency bloat, version mismatches in serverless deployment platforms (like Vercel), and execution latency.
+2. **Standard stdout/stderr logging only**: Rejected because while it works well with platforms that collect stdout (like ECS/Vercel integration), it doesn't support agentless log shipping for custom hosting setups that don't run a native Datadog agent.
 
 #### Consequences
 
-- **Positive**: What benefits does this decision bring?
-- **Negative**: What trade-offs or risks does this introduce?
-- **Neutral**: What side effects or follow-up work is needed?
-
-#### References
-
-- Link to PRD section
-- Link to relevant documentation
-- Link to discussion
+- **Positive**:
+  - Unified structured JSON logging for NestJS bootstrap and components.
+  - Zero-dependency implementation makes the app highly portable, fast, and secure.
+  - Automatic request correlation using `requestId`.
+  - Native agentless HTTP forwarding fallback for Serverless (Vercel) / Docker environments.
+- **Negative**:
+  - Requires maintaining the custom batch queueing logic, although it is simple and self-contained.
+- **Neutral**:
+  - Requires setting `DD_API_KEY` and other `DD_*` environment variables in `.env` for direct intake.
 
 ---
 
-*Last updated: Project initialization*
+*Last updated: 2026-06-08 — Datadog Logging Integration implemented*

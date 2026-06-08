@@ -19,7 +19,8 @@ jest.mock('@nestjs/bullmq', () => {
       };
     },
     Processor: () => (target: any) => {},
-    Process: () => (target: any, key: string | symbol, descriptor: any) => descriptor,
+    Process: () => (target: any, key: string | symbol, descriptor: any) =>
+      descriptor,
     WorkerHost: MockWorkerHost,
     BullModule: {
       forRoot: () => ({
@@ -73,7 +74,9 @@ jest.mock('ioredis', () => {
     }
     options = { connectionName: 'mock-bullmq' };
     status = 'ready';
-    info() { return Promise.resolve('redis_version:7.0.0'); }
+    info() {
+      return Promise.resolve('redis_version:7.0.0');
+    }
     multi() {
       return {
         exec: () => Promise.resolve([]),
@@ -82,7 +85,9 @@ jest.mock('ioredis', () => {
     defineCommand(name: string, options: any) {
       (this as any)[name] = jest.fn().mockResolvedValue(null);
     }
-    client() { return Promise.resolve('OK'); }
+    client() {
+      return Promise.resolve('OK');
+    }
     quit() {
       process.nextTick(() => {
         this.emit('end');
@@ -110,55 +115,68 @@ jest.mock('ioredis/built/Redis', () => {
 const mockOpenAIAdapter = {
   getProviderCode: () => 'openai',
   validateKey: jest.fn().mockResolvedValue(true),
-  executeChatCompletion: jest.fn().mockImplementation(async (apiKey: string, body: any) => {
-    if (apiKey === 'invalid-key') {
-      throw new HttpException('Invalid API Key credentials', HttpStatus.UNAUTHORIZED);
-    }
-    if (apiKey === 'rate-limited-key') {
-      throw new HttpException('Rate limit reached', HttpStatus.TOO_MANY_REQUESTS);
-    }
-    return {
-      id: 'chatcmpl-mock-id',
-      object: 'chat.completion',
-      created: Math.floor(Date.now() / 1000),
-      model: body.model,
-      choices: [
-        {
-          index: 0,
-          message: {
-            role: 'assistant',
-            content: `Mocked reply for key: ${apiKey}`,
+  executeChatCompletion: jest
+    .fn()
+    .mockImplementation(async (apiKey: string, body: any) => {
+      if (apiKey === 'invalid-key') {
+        throw new HttpException(
+          'Invalid API Key credentials',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+      if (apiKey === 'rate-limited-key') {
+        throw new HttpException(
+          'Rate limit reached',
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+      return {
+        id: 'chatcmpl-mock-id',
+        object: 'chat.completion',
+        created: Math.floor(Date.now() / 1000),
+        model: body.model,
+        choices: [
+          {
+            index: 0,
+            message: {
+              role: 'assistant',
+              content: `Mocked reply for key: ${apiKey}`,
+            },
+            finish_reason: 'stop',
           },
-          finish_reason: 'stop',
+        ],
+        usage: {
+          prompt_tokens: 10,
+          completion_tokens: 20,
+          total_tokens: 30,
         },
-      ],
-      usage: {
-        prompt_tokens: 10,
-        completion_tokens: 20,
-        total_tokens: 30,
-      },
-    };
-  }),
-  executeEmbeddings: jest.fn().mockImplementation(async (apiKey: string, body: any) => {
-    if (apiKey === 'rate-limited-key') {
-      throw new HttpException('Rate limit reached', HttpStatus.TOO_MANY_REQUESTS);
-    }
-    return {
-      object: 'list',
-      data: [
-        {
-          object: 'embedding',
-          index: 0,
-          embedding: [0.0023, -0.012, 0.985],
+      };
+    }),
+  executeEmbeddings: jest
+    .fn()
+    .mockImplementation(async (apiKey: string, body: any) => {
+      if (apiKey === 'rate-limited-key') {
+        throw new HttpException(
+          'Rate limit reached',
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
+      }
+      return {
+        object: 'list',
+        data: [
+          {
+            object: 'embedding',
+            index: 0,
+            embedding: [0.0023, -0.012, 0.985],
+          },
+        ],
+        model: body.model,
+        usage: {
+          prompt_tokens: 5,
+          total_tokens: 5,
         },
-      ],
-      model: body.model,
-      usage: {
-        prompt_tokens: 5,
-        total_tokens: 5,
-      },
-    };
-  }),
+      };
+    }),
 };
 
 const mockRedisData = new Map<string, string>();
@@ -172,9 +190,13 @@ const mockRedisService = {
   set: jest.fn().mockImplementation(async (key: string, value: string) => {
     mockRedisData.set(key, value);
   }),
-  setWithTtl: jest.fn().mockImplementation(async (key: string, value: string, ttlSeconds: number) => {
-    mockRedisData.set(key, value);
-  }),
+  setWithTtl: jest
+    .fn()
+    .mockImplementation(
+      async (key: string, value: string, ttlSeconds: number) => {
+        mockRedisData.set(key, value);
+      },
+    ),
   del: jest.fn().mockImplementation(async (key: string) => {
     mockRedisData.delete(key);
   }),
@@ -223,7 +245,7 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
         password: 'password123',
         name: 'Proxy Tester',
       });
-    
+
     expect(regRes.status).toBe(201);
 
     // 2. Login to obtain access token
@@ -243,7 +265,7 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
     // Cleanup Mongoose & Redis
     await mongooseConnection.collection('users').deleteMany({});
     await mongooseConnection.collection('apikeys').deleteMany({});
-    
+
     // Clear index caching in Redis
     const keys = await redisService.keys('user:*');
     for (const key of keys) {
@@ -307,7 +329,9 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
 
       expect(res.status).toBe(200);
       // High priority key (Key B) should be used
-      expect(res.body.choices[0].message.content).toContain('high-prio-secret-key-2');
+      expect(res.body.choices[0].message.content).toContain(
+        'high-prio-secret-key-2',
+      );
     });
   });
 
@@ -403,15 +427,24 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
         });
 
       expect(res.status).toBe(200);
-      expect(res.body.choices[0].message.content).toContain('healthy-backup-key-1');
+      expect(res.body.choices[0].message.content).toContain(
+        'healthy-backup-key-1',
+      );
 
       // Verify that 'rate-limited-key' is now locked in Redis cooldown
-      const keysInDb = await mongooseConnection.collection('apikeys').find({}).toArray();
-      const rateLimitedDbKey = keysInDb.find(k => k.name === 'Rate Limited Key');
-      
+      const keysInDb = await mongooseConnection
+        .collection('apikeys')
+        .find({})
+        .toArray();
+      const rateLimitedDbKey = keysInDb.find(
+        (k) => k.name === 'Rate Limited Key',
+      );
+
       expect(rateLimitedDbKey).toBeDefined();
       expect(rateLimitedDbKey.cooldownUntil).toBeDefined();
-      expect(new Date(rateLimitedDbKey.cooldownUntil).getTime()).toBeGreaterThan(Date.now());
+      expect(
+        new Date(rateLimitedDbKey.cooldownUntil).getTime(),
+      ).toBeGreaterThan(Date.now());
 
       const redisCooldownKey = `key:cooldown:${rateLimitedDbKey._id}`;
       const isRedisCooldownActive = await redisService.exists(redisCooldownKey);
@@ -452,11 +485,16 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
         });
 
       expect(res.status).toBe(200);
-      expect(res.body.choices[0].message.content).toContain('healthy-backup-key-2');
+      expect(res.body.choices[0].message.content).toContain(
+        'healthy-backup-key-2',
+      );
 
       // Verify the invalid key has been set to INACTIVE in the database
-      const keysInDb = await mongooseConnection.collection('apikeys').find({}).toArray();
-      const invalidDbKey = keysInDb.find(k => k.name === 'Invalid Key');
+      const keysInDb = await mongooseConnection
+        .collection('apikeys')
+        .find({})
+        .toArray();
+      const invalidDbKey = keysInDb.find((k) => k.name === 'Invalid Key');
       expect(invalidDbKey).toBeDefined();
       expect(invalidDbKey.status).toBe('inactive');
     });
@@ -499,7 +537,7 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
       expect(res.status).toBe(200);
       expect(res.body.object).toBe('list');
       expect(res.body.data).toBeInstanceOf(Array);
-      
+
       const modelIds = res.body.data.map((m: any) => m.id);
       expect(modelIds).toContain('gpt-4o');
       expect(modelIds).toContain('gemini-1.5-flash');

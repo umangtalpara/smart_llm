@@ -5,7 +5,12 @@ export type UsageStatDocument = UsageStat & Document;
 
 @Schema({ timestamps: true })
 export class UsageStat {
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true, index: true })
+  @Prop({
+    type: MongooseSchema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true,
+  })
   userId: MongooseSchema.Types.ObjectId | string;
 
   @Prop({ required: true, index: true })

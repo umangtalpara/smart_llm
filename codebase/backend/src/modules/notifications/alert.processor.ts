@@ -3,14 +3,25 @@ import { Job } from 'bullmq';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Logger } from '@nestjs/common';
-import { UsageStat, UsageStatDocument } from '../monitor/schemas/usage-stat.schema';
+import {
+  UsageStat,
+  UsageStatDocument,
+} from '../monitor/schemas/usage-stat.schema';
 import { ApiKey, ApiKeyDocument } from '../api-keys/schemas/api-key.schema';
-import { NotificationType, NotificationSeverity } from './schemas/notification.schema';
+import {
+  NotificationType,
+  NotificationSeverity,
+} from './schemas/notification.schema';
 import { RedisService } from '../../cache/redis.service';
 import { KeyStatus, ProviderCode } from '../../../../shared/types';
 import { NotificationsService } from './notifications.service';
 
-const PROVIDERS = [ProviderCode.OPENAI, ProviderCode.GEMINI, ProviderCode.CLAUDE, ProviderCode.GROQ];
+const PROVIDERS = [
+  ProviderCode.OPENAI,
+  ProviderCode.GEMINI,
+  ProviderCode.CLAUDE,
+  ProviderCode.GROQ,
+];
 const ALERT_DEDUP_TTL_SECONDS = 600; // 10 minutes
 
 @Processor('request-logs')
@@ -19,14 +30,18 @@ export class AlertProcessor extends WorkerHost {
 
   constructor(
     private readonly notificationsService: NotificationsService,
-    @InjectModel(UsageStat.name) private readonly usageStatModel: Model<UsageStatDocument>,
-    @InjectModel(ApiKey.name) private readonly apiKeyModel: Model<ApiKeyDocument>,
+    @InjectModel(UsageStat.name)
+    private readonly usageStatModel: Model<UsageStatDocument>,
+    @InjectModel(ApiKey.name)
+    private readonly apiKeyModel: Model<ApiKeyDocument>,
     private readonly redisService: RedisService,
   ) {
     super();
   }
 
-  async process(job: Job<Record<string, unknown>, unknown, string>): Promise<void> {
+  async process(
+    job: Job<Record<string, unknown>, unknown, string>,
+  ): Promise<void> {
     const userId = job.data.userId as string | undefined;
     const provider = job.data.provider as string | undefined;
     const statusCode = job.data.statusCode as number | undefined;
@@ -41,13 +56,20 @@ export class AlertProcessor extends WorkerHost {
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : String(err);
       const errStack = err instanceof Error ? err.stack : undefined;
-      this.logger.error(`AlertProcessor failed for job ${job.id}: ${errMsg}`, errStack);
+      this.logger.error(
+        `AlertProcessor failed for job ${job.id}: ${errMsg}`,
+        errStack,
+      );
       // Do NOT rethrow — alert failures must never block log processing
     }
   }
 
   // ── Rule 1: Key returned 401 (invalid / exhausted) ──────────────────────────
-  private async checkKeyExhausted(userId: string, statusCode: number, provider: string) {
+  private async checkKeyExhausted(
+    userId: string,
+    statusCode: number,
+    provider: string,
+  ) {
     if (statusCode !== 401) return;
 
     const dedupKey = `alert:${userId}:key_exhausted:${provider}`;
@@ -70,12 +92,12 @@ export class AlertProcessor extends WorkerHost {
     const dedupKey = `alert:${userId}:high_error_rate`;
     if (await this.redisService.exists(dedupKey)) return;
 
-    const dateStr = new Date().toISOString().split('T')[0]!;
+    const dateStr = new Date().toISOString().split('T')[0];
     const stat = await this.usageStatModel.findOne({ userId, date: dateStr });
     if (!stat || stat.requestCount < 10) return; // Need enough volume to be meaningful
 
     const errorRate = stat.failCount / stat.requestCount;
-    if (errorRate < 0.30) return;
+    if (errorRate < 0.3) return;
 
     const ratePercent = Math.round(errorRate * 100);
 
@@ -85,7 +107,12 @@ export class AlertProcessor extends WorkerHost {
       severity: NotificationSeverity.WARNING,
       title: `High Error Rate Detected — ${ratePercent}% Failures Today`,
       message: `${stat.failCount} out of ${stat.requestCount} requests failed today (${ratePercent}% error rate). Check provider health and your API keys.`,
-      metadata: { errorRate: ratePercent, failCount: stat.failCount, requestCount: stat.requestCount, date: dateStr },
+      metadata: {
+        errorRate: ratePercent,
+        failCount: stat.failCount,
+        requestCount: stat.requestCount,
+        date: dateStr,
+      },
     });
 
     await this.redisService.setWithTtl(dedupKey, '1', ALERT_DEDUP_TTL_SECONDS);
@@ -110,7 +137,9 @@ export class AlertProcessor extends WorkerHost {
       let cooldownCount = 0;
       for (const key of keys) {
         const isDbCooldown = key.cooldownUntil && key.cooldownUntil > now;
-        const isRedisCooldown = await this.redisService.exists(`key:cooldown:${key._id}`);
+        const isRedisCooldown = await this.redisService.exists(
+          `key:cooldown:${key._id}`,
+        );
         if (isDbCooldown || isRedisCooldown) cooldownCount++;
       }
 
@@ -125,7 +154,11 @@ export class AlertProcessor extends WorkerHost {
         metadata: { provider, keyCount: keys.length },
       });
 
-      await this.redisService.setWithTtl(dedupKey, '1', ALERT_DEDUP_TTL_SECONDS);
+      await this.redisService.setWithTtl(
+        dedupKey,
+        '1',
+        ALERT_DEDUP_TTL_SECONDS,
+      );
     }
   }
 

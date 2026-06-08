@@ -17,7 +17,8 @@ export class AppService {
   }
 
   getHealthCheck() {
-    const dbStatus = this.connection.readyState === 1 ? 'connected' : 'disconnected';
+    const dbStatus =
+      this.connection.readyState === 1 ? 'connected' : 'disconnected';
     return {
       status: 'UP',
       database: dbStatus,
@@ -25,4 +26,3 @@ export class AppService {
     };
   }
 }
-
