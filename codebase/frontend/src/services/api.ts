@@ -149,6 +149,8 @@ export interface LogsResponse {
   page: number;
   limit: number;
   totalPages: number;
+  nextCursor?: string | null;
+  hasNextPage?: boolean;
 }
 
 export interface ProviderHealth {
@@ -180,12 +182,14 @@ export const monitorApi = {
     limit?: number;
     provider?: string;
     statusCode?: number;
+    cursor?: string;
   }): Promise<LogsResponse> => {
     const query = new URLSearchParams();
     if (params.page) query.set('page', String(params.page));
     if (params.limit) query.set('limit', String(params.limit));
     if (params.provider) query.set('provider', params.provider);
     if (params.statusCode) query.set('statusCode', String(params.statusCode));
+    if (params.cursor) query.set('cursor', params.cursor);
     return api.get<LogsResponse>(`/monitor/logs?${query.toString()}`).then((r) => r.data);
   },
 

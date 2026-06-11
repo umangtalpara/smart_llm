@@ -49,6 +49,7 @@ export class MonitorController {
     @Query('limit') limit?: string,
     @Query('provider') provider?: ProviderCode,
     @Query('statusCode') statusCode?: string,
+    @Query('cursor') cursor?: string,
   ) {
     const pageNum = page ? parseInt(page, 10) : 1;
     const limitNum = limit ? parseInt(limit, 10) : 20;
@@ -60,6 +61,7 @@ export class MonitorController {
       limitNum,
       provider,
       codeNum,
+      cursor,
     );
   }
 

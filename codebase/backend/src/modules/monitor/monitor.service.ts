@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { RequestLog, RequestLogDocument } from './schemas/request-log.schema';
 import { UsageStat, UsageStatDocument } from './schemas/usage-stat.schema';
 import { ApiKey, ApiKeyDocument } from '../api-keys/schemas/api-key.schema';
@@ -88,8 +88,8 @@ export class MonitorService {
     limit = 20,
     provider?: ProviderCode,
     statusCode?: number,
+    cursor?: string,
   ) {
-    const skip = (page - 1) * limit;
     const query: any = { userId };
 
     if (provider) {
@@ -99,12 +99,34 @@ export class MonitorService {
       query.statusCode = statusCode;
     }
 
-    const total = await this.requestLogModel.countDocuments(query);
-    const logs = await this.requestLogModel
+    if (cursor && Types.ObjectId.isValid(cursor)) {
+      query._id = { $lt: new Types.ObjectId(cursor) };
+    }
+
+    let queryBuilder = this.requestLogModel
       .find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+      .sort({ _id: -1 });
+
+    if (!cursor && page > 1) {
+      const skip = (page - 1) * limit;
+      queryBuilder = queryBuilder.skip(skip);
+    }
+
+    const fetchLimit = limit + 1;
+    const logs = await queryBuilder.limit(fetchLimit);
+
+    const hasNextPage = logs.length > limit;
+    if (hasNextPage) {
+      logs.pop();
+    }
+
+    const nextCursor = hasNextPage && logs.length > 0 ? logs[logs.length - 1]._id.toString() : null;
+
+    const total = await this.requestLogModel.countDocuments({
+      userId,
+      ...(provider ? { provider } : {}),
+      ...(statusCode ? { statusCode } : {}),
+    });
 
     return {
       data: logs.map((log) => ({
@@ -125,6 +147,8 @@ export class MonitorService {
       page,
       limit,
       totalPages: Math.ceil(total / limit),
+      nextCursor,
+      hasNextPage,
     };
   }
 
