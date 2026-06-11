@@ -35,13 +35,14 @@ export class CerebrasAdapter implements ProviderAdapter {
     body: Record<string, unknown>,
   ): Promise<LlmResponse> {
     try {
+      const requestBody = { ...body, model: 'zai-glm-4.7' };
       const response = await fetch(`${this.baseUrl}/chat/completions`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${apiKey}`,
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {

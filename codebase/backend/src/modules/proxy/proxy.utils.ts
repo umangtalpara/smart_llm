@@ -8,7 +8,7 @@ export const PROVIDER_DEFAULT_MODELS: Record<ProviderCode, string> = {
   [ProviderCode.GROK]: 'grok-beta',
   [ProviderCode.OPENROUTER]: 'openrouter/auto',
   [ProviderCode.MISTRAL]: 'mistral-large-latest',
-  [ProviderCode.CEREBRAS]: 'cerebras-llama3.1-8b',
+  [ProviderCode.CEREBRAS]: 'zai-glm-4.7',
   [ProviderCode.CAMBERCLOUD]: 'camber-model',
   [ProviderCode.TOGETHER_AI]: 'llama3-8b-8192',
   [ProviderCode.GITHUB]: 'gpt-4o-mini',
@@ -110,7 +110,7 @@ export function getSupportedModels() {
         owned_by: 'mistral',
       },
       {
-        id: 'cerebras-llama3.1-8b',
+        id: 'zai-glm-4.7',
         object: 'model',
         created: 1723000000,
         owned_by: 'cerebras',
@@ -149,7 +149,10 @@ export function resolveProviderFromModel(model: string): ProviderCode {
   if (lowercaseModel.includes('openrouter')) {
     return ProviderCode.OPENROUTER;
   }
-  if (lowercaseModel.includes('cerebras')) {
+  if (
+    lowercaseModel.includes('cerebras') ||
+    lowercaseModel.includes('zai-glm-4.7')
+  ) {
     return ProviderCode.CEREBRAS;
   }
   if (lowercaseModel.includes('camber')) {
