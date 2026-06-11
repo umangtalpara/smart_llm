@@ -4,7 +4,7 @@ export const PROVIDER_DEFAULT_MODELS: Record<ProviderCode, string> = {
   [ProviderCode.OPENAI]: 'gpt-4o',
   [ProviderCode.GEMINI]: 'gemini-1.5-flash',
   [ProviderCode.CLAUDE]: 'claude-3-haiku',
-  [ProviderCode.GROQ]: 'llama3-8b-8192',
+  [ProviderCode.GROQ]: 'qwen/qwen3-32b',
   [ProviderCode.GROK]: 'grok-beta',
   [ProviderCode.OPENROUTER]: 'openrouter/auto',
   [ProviderCode.MISTRAL]: 'mistral-large-latest',
@@ -73,21 +73,27 @@ export function getSupportedModels() {
         owned_by: 'claude',
       },
       {
-        id: 'llama3-8b-8192',
+        id: 'qwen/qwen3-32b',
         object: 'model',
-        created: 1713436800,
+        created: 1723000000,
         owned_by: 'groq',
       },
       {
-        id: 'llama3-70b-8192',
+        id: 'llama-3.1-8b-instant',
         object: 'model',
-        created: 1713436800,
+        created: 1723000000,
         owned_by: 'groq',
       },
       {
-        id: 'mixtral-8x7b-32768',
+        id: 'meta-llama/llama-4-scout-17b-16e-instruct',
         object: 'model',
-        created: 1702339200,
+        created: 1723000000,
+        owned_by: 'groq',
+      },
+      {
+        id: 'groq/compound',
+        object: 'model',
+        created: 1723000000,
         owned_by: 'groq',
       },
       { id: 'grok-2', object: 'model', created: 1723000000, owned_by: 'grok' },
@@ -152,7 +158,10 @@ export function resolveProviderFromModel(model: string): ProviderCode {
   if (
     lowercaseModel.includes('llama') ||
     lowercaseModel.includes('mixtral') ||
-    lowercaseModel.includes('gemma')
+    lowercaseModel.includes('gemma') ||
+    lowercaseModel.includes('qwen') ||
+    lowercaseModel.includes('groq/') ||
+    lowercaseModel.includes('compound')
   ) {
     return ProviderCode.GROQ;
   }

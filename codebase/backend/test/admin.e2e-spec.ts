@@ -172,6 +172,7 @@ describe('Admin Panel & RBAC Modules (e2e)', () => {
   let providersService: ProvidersService;
   let adminToken: string;
   let userToken: string;
+  let userDevToken: string;
   let adminId: string;
   let userId: string;
 
@@ -211,6 +212,14 @@ describe('Admin Panel & RBAC Modules (e2e)', () => {
     expect(regUserRes.status).toBe(201);
     userToken = regUserRes.body.accessToken;
     userId = regUserRes.body.user.id;
+
+    // Generate developer token for proxy test
+    const devTokenRes = await request(app.getHttpServer())
+      .post('/api/v1/developer-tokens')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({ name: 'User Test Dev Token' });
+    expect(devTokenRes.status).toBe(201);
+    userDevToken = devTokenRes.body.rawToken;
 
     // 2. Create Admin User
     const regAdminRes = await request(app.getHttpServer())
@@ -339,7 +348,7 @@ describe('Admin Panel & RBAC Modules (e2e)', () => {
       // 4. Try to call proxy completions with gpt model and expect 503 Service Unavailable
       const proxyRes = await request(app.getHttpServer())
         .post('/api/v1/proxy/chat/completions')
-        .set('Authorization', `Bearer ${userToken}`)
+        .set('Authorization', `Bearer ${userDevToken}`)
         .send({
           model: 'gpt-4o',
           messages: [{ role: 'user', content: 'test' }],

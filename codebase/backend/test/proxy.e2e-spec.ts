@@ -215,6 +215,7 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
   let redisService: RedisService;
   let jwtToken: string;
   let userId: string;
+  let devToken: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -259,6 +260,14 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
     expect(loginRes.status).toBe(200);
     jwtToken = loginRes.body.accessToken;
     userId = loginRes.body.user.id;
+
+    // Generate developer token for proxy gateway endpoints
+    const devTokenRes = await request(app.getHttpServer())
+      .post('/api/v1/developer-tokens')
+      .set('Authorization', `Bearer ${jwtToken}`)
+      .send({ name: 'Proxy Test Token' });
+    expect(devTokenRes.status).toBe(201);
+    devToken = devTokenRes.body.rawToken;
   });
 
   afterAll(async () => {
@@ -320,7 +329,7 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
       // Call Completions Endpoint
       const res = await request(app.getHttpServer())
         .post('/api/v1/proxy/chat/completions')
-        .set('Authorization', `Bearer ${jwtToken}`)
+        .set('Authorization', `Bearer ${devToken}`)
         .set('x-rotation-strategy', RotationStrategy.PRIORITY)
         .send({
           model: 'gpt-4o',
@@ -361,7 +370,7 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
       // Request 1
       const res1 = await request(app.getHttpServer())
         .post('/api/v1/proxy/chat/completions')
-        .set('Authorization', `Bearer ${jwtToken}`)
+        .set('Authorization', `Bearer ${devToken}`)
         .set('x-rotation-strategy', RotationStrategy.ROUND_ROBIN)
         .send({
           model: 'gpt-4o',
@@ -371,7 +380,7 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
       // Request 2
       const res2 = await request(app.getHttpServer())
         .post('/api/v1/proxy/chat/completions')
-        .set('Authorization', `Bearer ${jwtToken}`)
+        .set('Authorization', `Bearer ${devToken}`)
         .set('x-rotation-strategy', RotationStrategy.ROUND_ROBIN)
         .send({
           model: 'gpt-4o',
@@ -420,7 +429,7 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
       // place it on cooldown in Redis and database, failover to Key B (priority 5) and succeed.
       const res = await request(app.getHttpServer())
         .post('/api/v1/proxy/chat/completions')
-        .set('Authorization', `Bearer ${jwtToken}`)
+        .set('Authorization', `Bearer ${devToken}`)
         .send({
           model: 'gpt-4o',
           messages: [{ role: 'user', content: 'hello' }],
@@ -478,7 +487,7 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
       // Execute completions call
       const res = await request(app.getHttpServer())
         .post('/api/v1/proxy/chat/completions')
-        .set('Authorization', `Bearer ${jwtToken}`)
+        .set('Authorization', `Bearer ${devToken}`)
         .send({
           model: 'gpt-4o',
           messages: [{ role: 'user', content: 'hello' }],
@@ -516,7 +525,7 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
       // Post embeddings request
       const res = await request(app.getHttpServer())
         .post('/api/v1/proxy/embeddings')
-        .set('Authorization', `Bearer ${jwtToken}`)
+        .set('Authorization', `Bearer ${devToken}`)
         .send({
           model: 'text-embedding-3-small',
           input: 'The quick brown fox jumps over the lazy dog',
@@ -532,7 +541,7 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
     it('should return a list of all supported models', async () => {
       const res = await request(app.getHttpServer())
         .get('/api/v1/proxy/models')
-        .set('Authorization', `Bearer ${jwtToken}`);
+        .set('Authorization', `Bearer ${devToken}`);
 
       expect(res.status).toBe(200);
       expect(res.body.object).toBe('list');
@@ -542,7 +551,7 @@ describe('ProxyLLM Gateway Engine (e2e)', () => {
       expect(modelIds).toContain('gpt-4o');
       expect(modelIds).toContain('gemini-1.5-flash');
       expect(modelIds).toContain('claude-3-5-sonnet');
-      expect(modelIds).toContain('llama3-8b-8192');
+      expect(modelIds).toContain('qwen/qwen3-32b');
     });
   });
 });

@@ -102,6 +102,12 @@ export class ProxyChatService {
 
         if (!foundAlt) {
           const duration = Date.now() - startTime;
+          const origProvider = resolveProviderFromModel(requestedModel);
+          const isOrigEnabled = await this.providersService.isProviderEnabled(origProvider);
+          const failMsg = isOrigEnabled
+            ? `All active API keys across all providers are exhausted or currently in cooldown.`
+            : `Provider ${origProvider} is globally disabled by administration.`;
+
           await this.publishRequestLog(
             userId,
             undefined,
@@ -110,15 +116,13 @@ export class ProxyChatService {
             '/chat/completions',
             duration,
             HttpStatus.SERVICE_UNAVAILABLE,
-            `All active API keys across all providers are exhausted or in cooldown.`,
+            failMsg,
             0,
             0,
             0,
             rotatedFromKeys,
           );
-          throw new ServiceUnavailableException(
-            `All active API keys across all providers are exhausted or currently in cooldown.`,
-          );
+          throw new ServiceUnavailableException(failMsg);
         }
       }
 
