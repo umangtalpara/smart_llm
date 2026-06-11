@@ -137,6 +137,12 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect('Hello World!');
+      .expect((res) => {
+        expect(res.body.message).toBe('Welcome to the ProxyLLM API Gateway!');
+        expect(res.body.version).toBe('1.0.0');
+        expect(res.body.status).toBe('active');
+        expect(res.body.docs).toBe('/docs');
+        expect(res.body.timestamp).toBeDefined();
+      });
   });
 });

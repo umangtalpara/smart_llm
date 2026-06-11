@@ -54,6 +54,7 @@ export default function ProviderHealthGrid({ health, isLoading }: ProviderHealth
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
       {(Object.entries(health) as [keyof HealthData, HealthData[keyof HealthData]][]).map(
         ([provider, info]) => {
+          if (!info) return null;
           const cfg = healthConfig[info.status] ?? healthConfig.inactive;
           const StatusIcon = cfg.icon;
           return (
