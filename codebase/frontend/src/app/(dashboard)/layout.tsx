@@ -17,23 +17,24 @@ export default function DashboardLayout({
   const router = useRouter();
   const { user, logout, checkAuth, isAuthenticated, isLoading } = useAuthStore();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [hasChecked, setHasChecked] = useState(false);
 
   useEffect(() => {
-    checkAuth();
+    checkAuth().finally(() => setHasChecked(true));
   }, [checkAuth]);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+    if (hasChecked && !isLoading && !isAuthenticated) {
       router.push('/login');
     }
-  }, [isAuthenticated, isLoading, router]);
+  }, [isAuthenticated, isLoading, router, hasChecked]);
 
   const handleLogout = async () => {
     await logout();
     router.push('/login');
   };
 
-  if (isLoading || !isAuthenticated) {
+  if (isLoading || !isAuthenticated || !hasChecked) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center space-y-4">
