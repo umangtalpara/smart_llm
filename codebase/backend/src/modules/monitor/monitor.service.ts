@@ -134,6 +134,7 @@ export class MonitorService {
       ProviderCode.GEMINI,
       ProviderCode.CLAUDE,
       ProviderCode.GROQ,
+      ProviderCode.GITHUB,
     ];
 
     const healthData: any = {};

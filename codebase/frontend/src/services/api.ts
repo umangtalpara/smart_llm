@@ -163,6 +163,7 @@ export interface HealthData {
   gemini: ProviderHealth;
   claude: ProviderHealth;
   groq: ProviderHealth;
+  github?: ProviderHealth;
 }
 
 // ─── Monitor API Functions ────────────────────────────────────────────────────

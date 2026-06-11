@@ -16,6 +16,7 @@ import { OpenRouterAdapter } from './adapters/openrouter.adapter';
 import { MistralAdapter } from './adapters/mistral.adapter';
 import { CerebrasAdapter } from './adapters/cerebras.adapter';
 import { CambercloudAdapter } from './adapters/cambercloud.adapter';
+import { GithubAdapter } from './adapters/github.adapter';
 import { Provider, ProviderDocument } from './schemas/provider.schema';
 import { RedisService } from '../../cache/redis.service';
 import { ProviderCode } from '../../../../shared/types';
@@ -38,6 +39,7 @@ export class ProvidersService implements OnModuleInit {
     private readonly mistralAdapter: MistralAdapter,
     private readonly cerebrasAdapter: CerebrasAdapter,
     private readonly cambercloudAdapter: CambercloudAdapter,
+    private readonly githubAdapter: GithubAdapter,
   ) {
     // Register adapters
     this.adapters.set(ProviderCode.OPENAI, this.openaiAdapter);
@@ -49,6 +51,7 @@ export class ProvidersService implements OnModuleInit {
     this.adapters.set(ProviderCode.MISTRAL, this.mistralAdapter);
     this.adapters.set(ProviderCode.CEREBRAS, this.cerebrasAdapter);
     this.adapters.set(ProviderCode.CAMBERCLOUD, this.cambercloudAdapter);
+    this.adapters.set(ProviderCode.GITHUB, this.githubAdapter);
 
     this.logger.log(
       `Registered ${this.adapters.size} provider adapters successfully.`,
@@ -120,6 +123,12 @@ export class ProvidersService implements OnModuleInit {
       {
         name: 'Cambercloud',
         code: ProviderCode.CAMBERCLOUD,
+        defaultRpmLimit: 10000,
+        defaultTpmLimit: 1000000,
+      },
+      {
+        name: 'GitHub Models',
+        code: ProviderCode.GITHUB,
         defaultRpmLimit: 10000,
         defaultTpmLimit: 1000000,
       },

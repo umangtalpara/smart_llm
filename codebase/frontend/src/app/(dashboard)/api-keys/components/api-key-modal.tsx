@@ -159,6 +159,7 @@ export default function ApiKeyModal({
                     <option value={ProviderCode.MISTRAL} className="bg-slate-900">Mistral AI</option>
                     <option value={ProviderCode.CEREBRAS} className="bg-slate-900">Cerebras</option>
                     <option value={ProviderCode.CAMBERCLOUD} className="bg-slate-900">Cambercloud</option>
+                    <option value={ProviderCode.GITHUB} className="bg-slate-900">GitHub Models</option>
                   </select>
                 </div>
               </div>

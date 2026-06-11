@@ -15,6 +15,7 @@ const providerLogos: Record<string, string> = {
   mistral: 'bg-orange-500/10 text-orange-400',
   cerebras: 'bg-violet-500/10 text-violet-400',
   cambercloud: 'bg-pink-500/10 text-pink-400',
+  github: 'bg-sky-500/10 text-sky-400',
 };
 
 interface ProviderStatusTabProps {

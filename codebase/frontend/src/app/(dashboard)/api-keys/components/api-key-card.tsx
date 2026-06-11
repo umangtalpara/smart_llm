@@ -37,6 +37,8 @@ export default function ApiKeyCard({
         return 'bg-violet-500/10 text-violet-400 border border-violet-500/25';
       case ProviderCode.CAMBERCLOUD:
         return 'bg-pink-500/10 text-pink-400 border border-pink-500/25';
+      case ProviderCode.GITHUB:
+        return 'bg-sky-500/10 text-sky-400 border border-sky-500/25';
       default:
         return 'bg-slate-500/10 text-slate-400 border border-slate-500/25';
     }

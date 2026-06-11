@@ -11,6 +11,7 @@ export const PROVIDER_DEFAULT_MODELS: Record<ProviderCode, string> = {
   [ProviderCode.CEREBRAS]: 'cerebras-llama3.1-8b',
   [ProviderCode.CAMBERCLOUD]: 'camber-model',
   [ProviderCode.TOGETHER_AI]: 'llama3-8b-8192',
+  [ProviderCode.GITHUB]: 'gpt-4o-mini',
 };
 
 export function getSupportedModels() {
@@ -114,6 +115,9 @@ export function getSupportedModels() {
 
 export function resolveProviderFromModel(model: string): ProviderCode {
   const lowercaseModel = model.toLowerCase();
+  if (lowercaseModel.includes('github')) {
+    return ProviderCode.GITHUB;
+  }
   if (
     lowercaseModel.includes('gpt') ||
     lowercaseModel.includes('o1') ||

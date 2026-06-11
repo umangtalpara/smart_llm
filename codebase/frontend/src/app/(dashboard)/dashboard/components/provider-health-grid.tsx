@@ -21,6 +21,7 @@ const providerLabels: Record<string, string> = {
   gemini: 'Gemini',
   claude: 'Claude',
   groq: 'Groq',
+  github: 'GitHub Models',
 };
 
 const providerColors: Record<string, string> = {
@@ -28,6 +29,7 @@ const providerColors: Record<string, string> = {
   gemini: 'text-purple-400',
   claude: 'text-blue-400',
   groq: 'text-orange-400',
+  github: 'text-sky-400',
 };
 
 interface ProviderHealthGridProps {
@@ -38,8 +40,8 @@ interface ProviderHealthGridProps {
 export default function ProviderHealthGrid({ health, isLoading }: ProviderHealthGridProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {['openai', 'gemini', 'claude', 'groq'].map((p) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        {['openai', 'gemini', 'claude', 'groq', 'github'].map((p) => (
           <div key={p} className="glass-card rounded-xl p-5 animate-pulse h-28" />
         ))}
       </div>
@@ -49,7 +51,7 @@ export default function ProviderHealthGrid({ health, isLoading }: ProviderHealth
   if (!health) return null;
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
       {(Object.entries(health) as [keyof HealthData, HealthData[keyof HealthData]][]).map(
         ([provider, info]) => {
           const cfg = healthConfig[info.status] ?? healthConfig.inactive;

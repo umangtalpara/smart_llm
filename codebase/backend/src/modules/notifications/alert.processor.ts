@@ -21,6 +21,7 @@ const PROVIDERS = [
   ProviderCode.GEMINI,
   ProviderCode.CLAUDE,
   ProviderCode.GROQ,
+  ProviderCode.GITHUB,
 ];
 const ALERT_DEDUP_TTL_SECONDS = 600; // 10 minutes
 
@@ -180,6 +181,7 @@ export class AlertProcessor extends WorkerHost {
       gemini: 'Gemini',
       claude: 'Claude',
       groq: 'Groq',
+      github: 'GitHub Models',
     };
     return labels[provider] ?? provider;
   }

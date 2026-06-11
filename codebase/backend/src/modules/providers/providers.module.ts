@@ -10,6 +10,7 @@ import { OpenRouterAdapter } from './adapters/openrouter.adapter';
 import { MistralAdapter } from './adapters/mistral.adapter';
 import { CerebrasAdapter } from './adapters/cerebras.adapter';
 import { CambercloudAdapter } from './adapters/cambercloud.adapter';
+import { GithubAdapter } from './adapters/github.adapter';
 import { Provider, ProviderSchema } from './schemas/provider.schema';
 
 @Global()
@@ -30,6 +31,7 @@ import { Provider, ProviderSchema } from './schemas/provider.schema';
     MistralAdapter,
     CerebrasAdapter,
     CambercloudAdapter,
+    GithubAdapter,
   ],
   exports: [
     ProvidersService,
@@ -42,6 +44,7 @@ import { Provider, ProviderSchema } from './schemas/provider.schema';
     MistralAdapter,
     CerebrasAdapter,
     CambercloudAdapter,
+    GithubAdapter,
     MongooseModule,
   ],
 })

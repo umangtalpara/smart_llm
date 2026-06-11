@@ -22,6 +22,7 @@ export enum ProviderCode {
   MISTRAL = 'mistral',
   GROK = 'grok',
   CAMBERCLOUD = 'cambercloud',
+  GITHUB = 'github',
 }
 
 export enum UserRole {
