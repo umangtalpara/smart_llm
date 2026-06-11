@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { RequestLog, RequestLogDocument } from '../schemas/request-log.schema';
 import { UsageStat, UsageStatDocument } from '../schemas/usage-stat.schema';
 import { Logger } from '@nestjs/common';
+import { AlertProcessor } from '../../notifications/alert.processor';
 
 @Processor('request-logs')
 export class LogProcessor extends WorkerHost {
@@ -15,6 +16,7 @@ export class LogProcessor extends WorkerHost {
     private readonly requestLogModel: Model<RequestLogDocument>,
     @InjectModel(UsageStat.name)
     private readonly usageStatModel: Model<UsageStatDocument>,
+    private readonly alertProcessor: AlertProcessor,
   ) {
     super();
   }
@@ -72,6 +74,17 @@ export class LogProcessor extends WorkerHost {
         },
         { upsert: true },
       );
+
+      // 3. Process Alerts sequentially
+      try {
+        await this.alertProcessor.process(job);
+      } catch (alertErr: unknown) {
+        this.logger.error(
+          `Alert processing encountered an error, but log saving was successful: ${
+            alertErr instanceof Error ? alertErr.message : alertErr
+          }`,
+        );
+      }
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : String(err);
       const errStack = err instanceof Error ? err.stack : undefined;

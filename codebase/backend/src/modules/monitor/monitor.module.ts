@@ -8,6 +8,7 @@ import { RequestLog, RequestLogSchema } from './schemas/request-log.schema';
 import { UsageStat, UsageStatSchema } from './schemas/usage-stat.schema';
 import { ApiKey, ApiKeySchema } from '../api-keys/schemas/api-key.schema';
 import { RedisModule } from '../../cache/redis.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { RedisModule } from '../../cache/redis.module';
       name: 'request-logs',
     }),
     RedisModule,
+    NotificationsModule,
   ],
   controllers: [MonitorController],
   providers: [MonitorService, LogProcessor],

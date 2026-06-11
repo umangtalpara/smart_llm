@@ -1,8 +1,7 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Injectable, Logger } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Logger } from '@nestjs/common';
 import {
   UsageStat,
   UsageStatDocument,
@@ -25,8 +24,8 @@ const PROVIDERS = [
 ];
 const ALERT_DEDUP_TTL_SECONDS = 600; // 10 minutes
 
-@Processor('request-logs')
-export class AlertProcessor extends WorkerHost {
+@Injectable()
+export class AlertProcessor {
   private readonly logger = new Logger(AlertProcessor.name);
 
   constructor(
@@ -36,9 +35,7 @@ export class AlertProcessor extends WorkerHost {
     @InjectModel(ApiKey.name)
     private readonly apiKeyModel: Model<ApiKeyDocument>,
     private readonly redisService: RedisService,
-  ) {
-    super();
-  }
+  ) {}
 
   async process(
     job: Job<Record<string, unknown>, unknown, string>,

@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { BullModule } from '@nestjs/bullmq';
 import { NotificationsController } from './notifications.controller';
 import { NotificationsService } from './notifications.service';
 import { AlertProcessor } from './alert.processor';
@@ -22,13 +21,10 @@ import { RedisModule } from '../../cache/redis.module';
       { name: UsageStat.name, schema: UsageStatSchema },
       { name: ApiKey.name, schema: ApiKeySchema },
     ]),
-    BullModule.registerQueue({
-      name: 'request-logs',
-    }),
     RedisModule,
   ],
   controllers: [NotificationsController],
   providers: [NotificationsService, AlertProcessor],
-  exports: [NotificationsService],
+  exports: [NotificationsService, AlertProcessor],
 })
 export class NotificationsModule {}
